@@ -5,7 +5,7 @@
 uint16_t* cursor;
 
 void set_cursor() {
-    cursor = (uint16_t*) 0xb8000;
+    cursor = (uint16_t*) TEXT_SCREEN_START_ADDRESS;
 }
 
 uint16_t get_screen_width() {
@@ -28,11 +28,12 @@ void print_clearall() {
 }
 
 void print_string(char const* str) {
-    for (int i=0; str[i] != '\0'; i++) {
+    uint16_t screen_width = get_screen_width()*2;
+    int screen_size = screen_width*get_screen_height();
+    for (int i=0; str[i] != '\0' && (int) cursor < TEXT_SCREEN_START_ADDRESS+screen_size; i++) {
         if (str[i] == '\n') {
-            uint16_t screen_width = get_screen_width();
-            int current_line_nb = ((int)cursor - 0xb8000) / (screen_width*2); // pk *2 ?? -> prck c'est 2 bytes de long une case
-            cursor = (uint16_t*) 0xb8000 + (current_line_nb+1)*screen_width;
+            int current_line_nb = ((int)cursor - TEXT_SCREEN_START_ADDRESS) / screen_width;
+            cursor = (uint16_t*) TEXT_SCREEN_START_ADDRESS + (current_line_nb+1)*(screen_width/2); // pk /2 ?? -> prck c'est 2 bytes de long une case
         } else {
             cursor[0] = 0x0f00 | str[i];
             cursor+=1;

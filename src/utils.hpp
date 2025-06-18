@@ -3,6 +3,8 @@
 
 #include "types.hpp"
 
+#define TEXT_SCREEN_START_ADDRESS 0xb8000
+
 void set_cursor();
 uint16_t get_screen_width();
 uint8_t get_screen_height();
