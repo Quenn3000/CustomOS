@@ -12,4 +12,6 @@ void print_clearall();
 void print_string(char const* str);
 bool print_int(int x, int base=10);
 
+char getch();
+
 #endif

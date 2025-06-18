@@ -3,6 +3,7 @@
 #include "math.hpp"
 #include "utils.hpp"
 #include "strings.hpp"
+#include "keyboard.hpp"
 
 
 
@@ -24,6 +25,7 @@ extern "C" void main() {
 
     
     while (1) {
-        asm volatile("hlt");
+        char c[] = {getch(), '\0'};
+        print_string((char*)&c);
     }
 }

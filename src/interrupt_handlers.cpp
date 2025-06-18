@@ -4,6 +4,10 @@
 
 //void(*interrupt_handlers[IDT_SIZE])(IDTEntry*);
 
+bool SCANCODE_PRESSED[SCANCODE_NUMBER];
+char KEYBOARD_BUFFER = 0;
+
+
 extern "C" __attribute__ ((interrupt)) void isr_test(IDTEntry* entry) {
     //__asm__ volatile ("cli");
     print_string("interruption handled");
@@ -16,8 +20,15 @@ extern "C" __attribute__((interrupt)) void keyboard_handler(IDTEntry* entry) {
 
     uint8_t scancode = inb(0x60);
 
-    print_int(scancode);
-	print_string("\n");
+    bool pressed = !(scancode & 128);
+    scancode &= 127;
+
+    if (pressed) {
+        SCANCODE_PRESSED[scancode] = true;
+        KEYBOARD_BUFFER = scancode;
+    } else {
+        SCANCODE_PRESSED[scancode] = false;
+    }
     
     outb(PIC_MASTER_COMMAND_PORT, 0x20);
 
