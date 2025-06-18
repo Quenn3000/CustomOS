@@ -24,8 +24,11 @@ extern "C" void main() {
     
 
     
+    char buffer[128];
     while (1) {
-        char c[] = {getch(), '\0'};
-        print_string((char*)&c);
+        print_string(">> ");
+        scan_keyboard(buffer, 128);
+        print_string(buffer);
+        print_string("\n");
     }
 }

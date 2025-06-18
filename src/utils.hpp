@@ -9,7 +9,10 @@ void set_cursor(); // set cursor to its initial value
 uint16_t get_screen_width();
 uint8_t get_screen_height();
 void print_clearall(); // clear the textual screen
+
+void print_char(char c);
 void print_string(char const* str);
 bool print_int(int x, int base=10);
+
 
 #endif

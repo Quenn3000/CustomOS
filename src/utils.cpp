@@ -27,6 +27,19 @@ void print_clearall() {
     return;
 }
 
+
+void print_char(char c) {
+    uint16_t screen_width = get_screen_width()*2;
+    if (c == '\n') {
+        int current_line_nb = ((int)cursor - TEXT_SCREEN_START_ADDRESS) / screen_width;
+        cursor = (uint16_t*) TEXT_SCREEN_START_ADDRESS + (current_line_nb+1)*(screen_width/2); // pk /2 ?? -> prck c'est 2 bytes de long une case
+    } else {
+        cursor[0] = 0x0f00 | c;
+        cursor+=1;
+    }
+}
+
+
 void print_string(char const* str) {
     uint16_t screen_width = get_screen_width()*2;
     int screen_size = screen_width*get_screen_height();

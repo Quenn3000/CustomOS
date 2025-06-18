@@ -1,6 +1,7 @@
 #include "keyboard.hpp"
 #include "types.hpp"
 #include "interrupt_handlers.hpp"
+#include "utils.hpp"
 
 
 void init_keyboard() {
@@ -29,4 +30,21 @@ char getch() {
 	}
 
     return 0;
+}
+
+
+bool scan_keyboard(char* buff, int buff_size) {
+	
+	int index=-1;
+	do {
+		index+=1;
+
+		KEYBOARD_BUFFER = 0;
+		while (KEYBOARD_BUFFER == 0);
+		buff[index] = scancode_to_ascii[KEYBOARD_BUFFER];
+		print_char(buff[index]);
+	} while (buff[index] != '\n' && index<buff_size);
+
+	buff[index] = '\0';
+	return index<buff_size;
 }
