@@ -1,7 +1,7 @@
 #ifndef __STRINGS_H_
 #define __STRINGS_H_
 
-int length(char* s);
-int atoi(char* s, int base=10);
+int length(char* s); // return the number of char in a string (strictly before '\0')
+int atoi(char* s, int base=10); // convert a char* representing an int in a specific base into int type variable
 
 #endif

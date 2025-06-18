@@ -1,6 +1,6 @@
 #ifndef __MATH_H_
 #define __MATH_H_
 
-int power_int(int x, int y);
+int power_int(int x, int y); //compute x^y
 
 #endif
