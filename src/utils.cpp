@@ -61,11 +61,11 @@ bool print_int(int x, int base) {
         power_base++;
     }
 
-    char c[] = "printed int";
+    int screen_size = get_screen_width()*2*get_screen_height();
 
     x = sav_x;
 
-    while (power_base >= 0) {
+    while (power_base >= 0 && (int) cursor < TEXT_SCREEN_START_ADDRESS+screen_size) {
         int to_print = x/power_int(base, power_base);
         if (to_print <= 9) {
             cursor[0] = 0x0f00 | 48 + (to_print);
