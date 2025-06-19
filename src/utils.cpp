@@ -4,8 +4,17 @@
 
 uint16_t* cursor;
 
-void set_cursor() {
-    cursor = (uint16_t*) TEXT_SCREEN_START_ADDRESS;
+bool set_cursor(int n, bool relative) {
+    if (relative) {
+        if ((int)cursor + n >= TEXT_SCREEN_START_ADDRESS && (int)cursor + n <= TEXT_SCREEN_START_ADDRESS+get_screen_width()*get_screen_height()) {
+            cursor+=n;
+            return true;
+        }
+        return false;
+    } else {
+        cursor = (uint16_t*) TEXT_SCREEN_START_ADDRESS + n;
+        return true;
+    }
 }
 
 uint16_t get_screen_width() {
@@ -25,6 +34,28 @@ void print_clearall() {
     }
     set_cursor();
     return;
+}
+
+
+bool set_char(int n, char c, bool relative) {
+    if (relative) {
+
+        if ((int)cursor + n >= TEXT_SCREEN_START_ADDRESS && (int)cursor + n <= TEXT_SCREEN_START_ADDRESS+get_screen_width()*get_screen_height()) {
+            *(cursor+n) = 0x0f00 | c;
+            return true;
+        }
+
+        return false;
+
+    } else {
+
+        if (n >= 0 && n < get_screen_width()*get_screen_height()) {
+            *((uint16_t*)TEXT_SCREEN_START_ADDRESS+n) = 0x0f00 | c;
+            return true;
+        }
+        
+        return false;
+    }
 }
 
 

@@ -21,6 +21,19 @@ extern "C" void main() {
 
     print_clearall();
     print_string((char*)&title);
+
+
+    int t = 1;
+    int a = 2;
+    char b = 'p';
+    in_format_factor("%d %d %c", "1125 34 k", 3, &t, &a, &b);
+
+    print_int(t);
+    print_string("\n");
+    print_int(a);
+    print_string("\n");
+    print_char(b);
+    print_string("\n");
     
 
     
