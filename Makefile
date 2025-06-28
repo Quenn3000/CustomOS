@@ -1,7 +1,7 @@
 SRC_PATH = src/
 RES_PATH = res/
 CFLAGS = -ffreestanding -mgeneral-regs-only -m32 -g -fno-pie -fno-use-cxa-atexit -nostdlib -fno-builtin -fno-rtti -fno-exceptions -fno-leading-underscore -fpermissive -fno-stack-protector
-objects = kernel_entry.o kernel.o math.o utils.o InterruptDescriptorTable.o strings.o interrupt_handlers.o keyboard.o
+objects = kernel_entry.o kernel.o math.o utils.o InterruptDescriptorTable.o strings.o interrupt_handlers.o keyboard.o heap.o
 objects_target = $(addprefix $(RES_PATH),$(objects))
 
 all: $(RES_PATH)bin/OS.bin

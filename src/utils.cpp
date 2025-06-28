@@ -30,7 +30,7 @@ void print_clearall() {
     int nb = get_screen_width()*get_screen_height();
     set_cursor();
     for (int i=0; i<nb; i++) {
-        *cursor++ = 0x0f00 | 32; // blank space;
+        *cursor++ = 0x0f00 | ' ';
     }
     set_cursor();
     return;

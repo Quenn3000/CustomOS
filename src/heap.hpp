@@ -11,7 +11,6 @@ typedef struct HeapChunk {
 } HeapChunk;
 
 
-
 bool init_heap();
 void * malloc(uint32_t size);
 void free(void * address);
