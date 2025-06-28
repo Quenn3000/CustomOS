@@ -28,7 +28,7 @@ void * malloc(uint32_t size) {
 		if (!heap_chunks[i].used) {
 			scan_nb += 1;
 
-			if (scan_nb*HEAPCHUNK_SIZE >=8 size) {
+			if (scan_nb*HEAPCHUNK_SIZE >=size) {
 				for (int j=-scan_nb+1; j<0; j++) {
 					heap_chunks[i+j].used = true;
 					heap_chunks[i+j].linked = true;
