@@ -4,6 +4,7 @@
 #include "utils.hpp"
 #include "strings.hpp"
 #include "keyboard.hpp"
+#include "heap.hpp"
 
 
 
@@ -15,12 +16,21 @@ extern "C" void main() {
 
     print_string("Loading IDT Kernel\n");
     init_idt();
+    init_heap();
 
     __asm__ volatile ("int $0x80"); // Manually trigger interrupt
     __asm__ volatile ("int $0x21");
 
     print_clearall();
     print_string((char*)&title);
+
+
+    int t = 1;
+    int a = 2;
+    char b = 'p';
+    in_format_factor("%d %d %c", "1125 34 k", 3, &t, &a, &b);
+
+    //print_string("How old are you ? ");
     
 
     

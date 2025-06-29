@@ -1,6 +1,7 @@
 #include "strings.hpp"
 #include "math.hpp"
 #include "types.hpp"
+#include "utils.hpp"
 
 int length(char* s) {
 	int i;
@@ -33,4 +34,84 @@ int atoi(char* s, int base) {
 	}
 
 	return res;
+}
+
+
+
+bool in_format_factor(char* format, char* text, int nb_args, void * args, ...) { // here args point to the end of
+
+	/*for (int i=0; i<nb_args; i++) {
+		print_int(*((int*)args-i));
+		print_string("\n");
+	}*/
+	
+	int format_length = length(format);
+	int text_size = length(text);
+
+	int format_index = 0;
+	int text_index = 0;
+
+	bool first_match = true;
+
+	while (format_index < format_length) {
+		if (format[format_index] == '%' && format_index<format_length-1) { // manage %*
+			
+			switch (format[format_index+1]) {
+
+				case 'd': // int
+					if (first_match) {
+						first_match = false;
+					} else {
+						args-=sizeof(int);
+					}
+					
+					
+					char buff[21]; // max size for an unsigned long long int in digit
+					int i;
+					
+					for (i=0; text[i+text_index] >= 48 && text[i+text_index] <= 57 && i+text_index<text_size && i<20; i++) { // let space for '\0' char
+						buff[i] = text[i+text_index];
+					}
+					buff[i] = '\0';
+
+					*(int*)(args) = atoi(buff);
+					
+
+					format_index+=2;
+					text_index += i;
+
+					break;
+
+				case 'c': // char
+
+					if (first_match) {
+						first_match = false;
+					} else {
+						args-=sizeof(char);
+					}
+
+					*(char*)(args) = text[text_index];
+
+					format_index+=2;
+					text_index += 1;
+
+					break;
+
+
+
+				default:
+					break;
+			}
+
+		} else if (format[format_index] != text[text_index]) {
+			return false;
+		} else {
+			format_index+=1;
+			text_index+=1;
+		}
+
+	}
+
+	return true;
+
 }

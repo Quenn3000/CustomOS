@@ -40,9 +40,17 @@ bool scan_keyboard(char* buff, int buff_size) {
 		index+=1;
 
 		KEYBOARD_BUFFER = 0;
-		while (KEYBOARD_BUFFER == 0);
-		buff[index] = scancode_to_ascii[KEYBOARD_BUFFER];
-		print_char(buff[index]);
+		while (KEYBOARD_BUFFER == 0 || (scancode_to_ascii[KEYBOARD_BUFFER] == '\b' && index<=0));
+
+		if (scancode_to_ascii[KEYBOARD_BUFFER] == '\b') {
+			buff[index-1] = '\0';
+			index -=2;
+			set_char(-1, ' ', true);
+			set_cursor(-1, true);
+		} else {
+			buff[index] = scancode_to_ascii[KEYBOARD_BUFFER];
+			print_char(buff[index]);
+		}
 	} while (buff[index] != '\n' && index<buff_size);
 
 	buff[index] = '\0';
