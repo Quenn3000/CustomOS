@@ -7,11 +7,11 @@ mov [BOOT_DISK], dl
 xor ax, ax  ; set ax to 0
 mov es, ax
 mov ds, ax
-mov bp, 0x8000
+mov bx, 0x7e00
 mov sp, bp
 
 mov bx, KERNEL_LOCATION
-mov dh, 32
+mov dh, 50 ; number of sector containing the kernel to read
 
 mov ah, 0x02
 mov al, dh 

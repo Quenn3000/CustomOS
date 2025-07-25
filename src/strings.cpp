@@ -3,7 +3,7 @@
 #include "types.hpp"
 #include "utils.hpp"
 
-int length(char* s) {
+int strlen(char* s) {
 	int i;
 	for (i=0; s[i] != '\0'; i++);
 	return i;
@@ -12,7 +12,7 @@ int length(char* s) {
 int atoi(char* s, int base) {
 
 	int res = 0;
-	int nb_digit = length(s);
+	int nb_digit = strlen(s);
 	bool neg = false;
 
 	if (nb_digit > 0 && s[0] == '-') {
@@ -37,61 +37,114 @@ int atoi(char* s, int base) {
 }
 
 
+bool itoa(int value, int buffer_size, char* buffer, int base) {
+	if (base < 2 || base > 32) {
+        return false;
+    }
 
-bool in_format_factor(char* format, char* text, int nb_args, void * args, ...) { // here args point to the end of
+    if (value < 0) {
+		if (buffer_size-- <= 0) {
+			return false;
+		}
+        buffer[0] = '-';
+		buffer+=1;
+        value = -value;
+    }
 
-	/*for (int i=0; i<nb_args; i++) {
-		print_int(*((int*)args-i));
-		print_string("\n");
-	}*/
+    int sav_value = value;
+    int power_base = 0;
+
+    while (value >= base) {
+        value = value / base;
+        power_base++;
+    }
+
+    value = sav_value;
+
+    while (power_base >= 0) {
+		print_string("a");
+		if (buffer_size < 0) {
+			return false;
+		}
+		
+        int to_print = value/power_int(base, power_base);
+        if (to_print <= 9) {
+            buffer[0] = 48 + (to_print);
+        } else {
+            buffer[0] = 55 + (to_print);
+        }
+        value-= (value/power_int(base, power_base)) * power_int(base, power_base);
+
+		buffer_size--;
+		buffer+=1;
+
+        power_base-=1;
+    }
+
+	if (buffer_size <= 0) {
+		return false;
+	}
+
+	buffer[0] = '\0';
+
+    return true;
+}
+
+
+
+bool in_format_factor(char* format, char* text, int nb_args, void * arg, ...) { // arg is basically the start of an array of void*
 	
-	int format_length = length(format);
-	int text_size = length(text);
+	int format_length = strlen(format); // size of the format string
+	int text_size = strlen(text);		// size of the text string
 
-	int format_index = 0;
-	int text_index = 0;
+	int format_index = 0;				// index of the format process
+	int text_index = 0;					// index of the text process
+	int arg_index = 0;					// index for wich argument is treating
 
-	bool first_match = true;
+	void** args = (void**)(&arg); // i traduce arg as what it is really, an array of void* (=> void**)
 
 	while (format_index < format_length) {
-		if (format[format_index] == '%' && format_index<format_length-1) { // manage %*
+		if (format[format_index] == text[text_index]) {
+			//print_char(text[text_index]);
+			format_index+=1;
+			text_index+=1;
+		} else if (format[format_index] == '%' && format_index<format_length-1) { // manage %*
 			
 			switch (format[format_index+1]) {
 
 				case 'd': // int
-					if (first_match) {
-						first_match = false;
-					} else {
-						args-=sizeof(int);
-					}
 					
 					
-					char buff[21]; // max size for an unsigned long long int in digit
+					char buff[21]; // 21 is the max size for an unsigned long long int in digit
 					int i;
 					
-					for (i=0; text[i+text_index] >= 48 && text[i+text_index] <= 57 && i+text_index<text_size && i<20; i++) { // let space for '\0' char
+					for (i=0; text[i+text_index] >= 48 && text[i+text_index] <= 57 && i+text_index<text_size && i<20; i++) { // leave space for '\0' char
+						if (text[i+text_index] == format[format_index+2]) { // si on a un chiffre qui correspond normalement au caractère suivant
+							break;	// alors on a atteint la suite du format, donc on met fin à cette analyse
+						}
 						buff[i] = text[i+text_index];
 					}
 					buff[i] = '\0';
 
-					*(int*)(args) = atoi(buff);
+					*(int*)(args[arg_index]) = atoi(buff);
 					
 
-					format_index+=2;
+					arg_index += 1;
+					format_index += 2;
 					text_index += i;
 
 					break;
 
 				case 'c': // char
 
-					if (first_match) {
-						first_match = false;
-					} else {
-						args-=sizeof(char);
-					}
+					*(char*)(args[arg_index]) = text[text_index];
 
-					*(char*)(args) = text[text_index];
+					print_char(text[text_index]);
+					print_char(' ');
+					print_int(args);
+					print_string("\n");
 
+					arg_index += 1;
 					format_index+=2;
 					text_index += 1;
 
@@ -103,11 +156,8 @@ bool in_format_factor(char* format, char* text, int nb_args, void * args, ...) {
 					break;
 			}
 
-		} else if (format[format_index] != text[text_index]) {
-			return false;
 		} else {
-			format_index+=1;
-			text_index+=1;
+			return false;
 		}
 
 	}
@@ -115,3 +165,24 @@ bool in_format_factor(char* format, char* text, int nb_args, void * args, ...) {
 	return true;
 
 }
+
+
+/*
+bool out_format_factor(char format, int buffer_size, char* buffer, int nb_args, void * arg, ...) {
+	int format_index = 0;
+	int format_length = strlen(format);
+
+	while (format_index < format_length) {
+		if (format[format_index] == '%' && format_index+1 < format_length) {
+			switch (format[format_index+1]) {
+				case 'd':
+					break;
+				
+				case 'c':
+					break;
+			}
+		}
+	}
+
+	return false;
+}*/

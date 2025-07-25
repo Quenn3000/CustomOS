@@ -37,6 +37,11 @@ $(RES_PATH)bin/OS.bin: $(RES_PATH)full_os.bin $(RES_PATH)zeros.bin
 clean:
 	find res/. -type f -exec rm {} \;
 
+tests:
+	$(objects += $(objects) test/*.o)
+	$(MAKE) all
+
+
 run:
 	qemu-system-x86_64 -drive format=raw,file="res/bin/OS.bin",index=0,if=floppy, -m 128M
 

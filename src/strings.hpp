@@ -3,11 +3,13 @@
 
 #include "types.hpp"
 
-int length(char* s); // return the number of char in a string (strictly before '\0')
+int strlen(char* s); // return the number of char in a string (strictly before '\0')
 int atoi(char* s, int base=10); // convert a char* representing an int in a specific base into int type variable
+bool itoa(int value, int buffer_size, char* buffer, int base);
 
 
-bool in_format_factor(char* format, char* text, int nb_args, void * args, ...);
+bool in_format_factor(char* format, char* text, int nb_args, void * arg, ...);
+bool out_format_factor(char format, int buffer_size, char* buffer, int nb_args, void * arg, ...);
 
 
 #endif

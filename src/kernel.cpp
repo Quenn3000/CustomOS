@@ -25,20 +25,23 @@ extern "C" void main() {
     print_string((char*)&title);
 
 
-    int t = 1;
-    int a = 2;
-    char b = 'p';
-    in_format_factor("%d %d %c", "1125 34 k", 3, &t, &a, &b);
+    char s[6];
+    itoa(123, 6, s, 10);
+    //print_int(&s);
+
+    //print_string(s);
 
     //print_string("How old are you ? ");
-    
+    /*int x = 1;
+    x = x+3;
+    x = x+7;*/
 
-    
+    // quand j'ai trop de code, je crash
     char buffer[128];
     while (1) {
         print_string(">> ");
-        scan_keyboard(buffer, 128);
+        scan_keyboard(buffer, 128, true);
         print_string(buffer);
-        print_string("\n");
+        print_string("\n"); // crash ? plus de mémoire ou qque chose du style
     }
 }
