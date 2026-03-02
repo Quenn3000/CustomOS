@@ -3,12 +3,15 @@
 #include "types.hpp"
 #include "utils.hpp"
 
+
+// get the size of a string (before '\0')
 int strlen(char* s) {
 	int i;
 	for (i=0; s[i] != '\0'; i++);
 	return i;
 }
 
+// convert string, from base 2 to 16... NO, 36 !! LOL
 int atoi(char* s, int base) {
 
 	int res = 0;
@@ -36,7 +39,7 @@ int atoi(char* s, int base) {
 	return res;
 }
 
-
+// convert an int into a string in the buffer, in the base you want (return if the operation was a success or it failed)
 bool itoa(int value, int buffer_size, char* buffer, int base) {
 	if (base < 2 || base > 32) {
         return false;
@@ -91,7 +94,7 @@ bool itoa(int value, int buffer_size, char* buffer, int base) {
 }
 
 
-
+// compare two strings (basic comparison, only if it is equals)
 bool strcmp(char s1[], char s2[]) {
 	if (strlen(s1) != strlen(s2)) return false;
 
@@ -102,7 +105,7 @@ bool strcmp(char s1[], char s2[]) {
 }
 
 
-
+// store into all args the values of text recovered from format
 bool in_format_factor(char* format, char* text, int nb_args, void * arg, ...) { // arg is basically the start of an array of void*
 	
 	int format_length = strlen(format); // size of the format string

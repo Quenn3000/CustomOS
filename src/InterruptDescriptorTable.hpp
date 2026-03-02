@@ -31,6 +31,7 @@ struct IDTPointer {
 typedef struct IDTEntry IDTEntry;
 typedef struct IDTPointer IDTPointer;
 
+// assembly function coded into kernel_entry.asm, loading the Interrupt Descriptor Table into the IDTRegister
 extern "C" void load_idt(IDTPointer* idt_ptr);
 
 

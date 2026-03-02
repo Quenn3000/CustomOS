@@ -3,13 +3,14 @@
 #include "interrupt_handlers.hpp"
 #include "utils.hpp"
 
-
+// init all the keyboard related variables
 void init_keyboard() {
 	for (int i=0; i<256; i++) {
 		KEY_PRESSED[i] = false;
 	}
 }
 
+// get a character from the keyboard
 char getch() {
     if (KEYBOARD_BUFFER != 0) {
 		char c = KEYBOARD_BUFFER;
@@ -20,7 +21,7 @@ char getch() {
     return 0;
 }
 
-
+// get all keys from the keyboard into the buffer, until an '\n' occur
 bool scan_keyboard(char* buff, int buff_size, bool graphic) {
 	
 	int index=-1;

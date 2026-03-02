@@ -7,9 +7,10 @@
 #define LSHIFT 14
 #define RSHIFT 15
 
-bool KEY_PRESSED[256];
-char KEYBOARD_BUFFER = 0;
+bool KEY_PRESSED[256]; // global variable actualized to know if a specific key is pressed (by ascii value)
+char KEYBOARD_BUFFER = 0; // keyboard key buffer; the last pressed key
 
+// correspondance for azerty classic french keyboard
 const char scancode_to_ascii[] = {
     0,  27, '&', '~', '\"', '\'', '(', '-',
     '`','_','^','@',')','=', '\b', '\t',
@@ -33,6 +34,7 @@ const char shifted_scancode_to_ascii[] = {
 };
 
 
+
 extern "C" __attribute__ ((interrupt)) void isr_test(IDTEntry* entry) {
     //__asm__ volatile ("cli");
     print_string("interruption handled");
@@ -41,6 +43,7 @@ extern "C" __attribute__ ((interrupt)) void isr_test(IDTEntry* entry) {
 }
 
 
+// keyboard interrupts handler
 extern "C" __attribute__((interrupt)) void keyboard_handler(IDTEntry* entry) {
 
     uint8_t scancode = inb(0x60);
@@ -67,6 +70,7 @@ extern "C" __attribute__((interrupt)) void default_handler(IDTEntry* entry) {
     outb(PIC_MASTER_COMMAND_PORT, 0x20);
 }
 
+// set for each treated interrupts the correct handler
 void set_idt_gates() {
 	set_idt_gate(0x80, (uint32_t)isr_test);  // Set IRQ1 (keyboard) for testing
     set_idt_gate(0x20, (uint32_t)default_handler);

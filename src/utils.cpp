@@ -4,6 +4,8 @@
 
 uint16_t* cursor;
 
+
+// set the global variable cursor
 bool set_cursor(int n, bool relative) {
     if (relative) {
         if ((int)cursor + n >= TEXT_SCREEN_START_ADDRESS && (int)cursor + n <= TEXT_SCREEN_START_ADDRESS+get_screen_width()*get_screen_height()) {
@@ -17,15 +19,17 @@ bool set_cursor(int n, bool relative) {
     }
 }
 
+// quit simple
 uint16_t get_screen_width() {
     return *(uint16_t*)0x044A;  // Read the number of columns
 }
 
+// same
 uint8_t get_screen_height() {
     return *(uint8_t*)0x0484 + 1;   // Read the number of rows
 }
 
-
+// clear all the screen values
 void print_clearall() {
     int nb = get_screen_width()*get_screen_height();
     set_cursor();
@@ -36,7 +40,7 @@ void print_clearall() {
     return;
 }
 
-
+// set the char c, n cases after the current position (if in relative mod) or at the n-th case (if not in relative mod)
 bool set_char(int n, char c, bool relative) {
     if (relative) {
 
@@ -58,7 +62,7 @@ bool set_char(int n, char c, bool relative) {
     }
 }
 
-
+// print a char on the current cursor position
 void print_char(char c) {
     uint16_t screen_width = get_screen_width()*2;
     if (c == '\n') {
@@ -71,6 +75,7 @@ void print_char(char c) {
 }
 
 
+// print a string on the current cursor position
 void print_string(char const* str) {
     uint16_t screen_width = get_screen_width()*2;
     int screen_size = screen_width*get_screen_height();
@@ -86,6 +91,8 @@ void print_string(char const* str) {
 
 }
 
+
+// print an int on the current cursor position
 bool print_int(int x, int base) {
     if (base < 2 || base > 32) {
         return false;
