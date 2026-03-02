@@ -22,6 +22,8 @@ void idt_install() {
     idt_ptr.limit = (sizeof(IDTEntry) * 256) - 1;
     idt_ptr.base = (uint32_t)&idt;
 
+    print_int((int)&idt_ptr);
+
     load_idt(&idt_ptr);
 
 

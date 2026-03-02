@@ -92,6 +92,17 @@ bool itoa(int value, int buffer_size, char* buffer, int base) {
 
 
 
+bool strcmp(char s1[], char s2[]) {
+	if (strlen(s1) != strlen(s2)) return false;
+
+	while (*s1 != '\0')
+		if (*s1++ != *s2++) return false;
+	
+	return true;
+}
+
+
+
 bool in_format_factor(char* format, char* text, int nb_args, void * arg, ...) { // arg is basically the start of an array of void*
 	
 	int format_length = strlen(format); // size of the format string

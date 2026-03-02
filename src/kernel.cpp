@@ -18,30 +18,17 @@ extern "C" void main() {
     init_idt();
     init_heap();
 
-    __asm__ volatile ("int $0x80"); // Manually trigger interrupt
-    __asm__ volatile ("int $0x21");
-
     print_clearall();
     print_string((char*)&title);
 
 
-    char s[6];
-    itoa(123, 6, s, 10);
-    //print_int(&s);
-
-    //print_string(s);
-
-    //print_string("How old are you ? ");
-    /*int x = 1;
-    x = x+3;
-    x = x+7;*/
-
-    // quand j'ai trop de code, je crash
     char buffer[128];
     while (1) {
         print_string(">> ");
         scan_keyboard(buffer, 128, true);
         print_string(buffer);
-        print_string("\n"); // crash ? plus de mémoire ou qque chose du style
+        print_string("\n");
+
+        if (strcmp(buffer, "exit")) return;
     }
 }
