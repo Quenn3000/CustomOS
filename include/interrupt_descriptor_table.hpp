@@ -1,5 +1,4 @@
-#ifndef __IDT_H_
-#define __IDT_H_
+#pragma once
 
 #include "types.hpp"
 #include "utils.hpp"
@@ -34,12 +33,21 @@ typedef struct IDTPointer IDTPointer;
 // assembly function coded into kernel_entry.asm, loading the Interrupt Descriptor Table into the IDTRegister
 extern "C" void load_idt(IDTPointer* idt_ptr);
 
+class InterruptManager {
+    public:
+        InterruptManager();
 
-void set_idt_gate(int n, uint32_t handler);
-extern "C" void isr_test(IDTEntry* entry);
-void idt_install();
-void init_idt();
-void init_pic();
+        void init();
 
+        bool setInterrupt(int n, uint32_t function);
+        void resetInterrupt(int interrupt);
+    
+    private:
+        int interrupt_nb = IDT_SIZE; // 0x00 <--> 0x15 : processor interruption; 0x20 <--> 0xff : external interruption
 
-#endif
+        void idt_install();
+        void init_pic();
+
+        IDTEntry idt[IDT_SIZE];
+        IDTPointer idt_ptr;
+};

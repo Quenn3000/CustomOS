@@ -1,8 +1,8 @@
 #include "interrupt_handlers.hpp"
-#include "InterruptDescriptorTable.hpp"
+#include "interrupt_descriptor_table.hpp"
 #include "ioport.hpp"
+#include "types.hpp"
 
-//void(*interrupt_handlers[IDT_SIZE])(IDTEntry*);
 
 #define LSHIFT 14
 #define RSHIFT 15
@@ -35,14 +35,6 @@ const char shifted_scancode_to_ascii[] = {
 
 
 
-extern "C" __attribute__ ((interrupt)) void isr_test(IDTEntry* entry) {
-    //__asm__ volatile ("cli");
-    print_string("interruption handled");
-
-    return;
-}
-
-
 // keyboard interrupts handler
 extern "C" __attribute__((interrupt)) void keyboard_handler(IDTEntry* entry) {
 
@@ -68,11 +60,4 @@ extern "C" __attribute__((interrupt)) void keyboard_handler(IDTEntry* entry) {
 extern "C" __attribute__((interrupt)) void default_handler(IDTEntry* entry) {
     // You can print something or halt
     outb(PIC_MASTER_COMMAND_PORT, 0x20);
-}
-
-// set for each treated interrupts the correct handler
-void set_idt_gates() {
-	set_idt_gate(0x80, (uint32_t)isr_test);  // Set IRQ1 (keyboard) for testing
-    set_idt_gate(0x20, (uint32_t)default_handler);
-    set_idt_gate(0x21, (uint32_t)keyboard_handler);
 }

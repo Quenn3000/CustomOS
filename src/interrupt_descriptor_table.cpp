@@ -1,0 +1,84 @@
+#include "interrupt_descriptor_table.hpp"
+#include "utils.hpp"
+#include "interrupt_handlers.hpp"
+#include "ioport.hpp"
+
+// https://pdos.csail.mit.edu/6.828/2005/readings/i386/s09_05.htm
+
+
+bool InterruptManager::setInterrupt(int n, uint32_t handler) {
+    bool res = !( this->idt[n].offset_low || this->idt[n].offset_high ); // check si un handler avait déjà été renseigné pour la fonction
+
+    this->idt[n].offset_low = handler & 0xFFFF;
+    this->idt[n].selector = 0x08; // Kernel code segment
+    this->idt[n].zero = 0;
+    this->idt[n].type_attr = 0x8E; // 32-bit interrupt gate
+    this->idt[n].offset_high = (handler >> 16) & 0xFFFF;
+
+    return res;
+}
+
+void InterruptManager::resetInterrupt(int n) {
+    this->idt[n].offset_low = 0;
+    this->idt[n].selector = 0; // Kernel code segment
+    this->idt[n].zero = 0;
+    this->idt[n].type_attr = 0; // 32-bit interrupt gate
+    this->idt[n].offset_high = 0;
+}
+
+// set all parameters to call correctly load_idt
+void InterruptManager::idt_install() {
+    this->idt_ptr.limit = (sizeof(IDTEntry) * IDT_SIZE) - 1;
+    this->idt_ptr.base = (uint32_t)&idt;
+
+    //print_int((int)&idt_ptr);
+
+    load_idt(&this->idt_ptr);
+
+
+    //print_string("IDT installed\n");
+}
+
+// global function for initializing IDT
+void InterruptManager::init() {
+    asm volatile ("cli");
+
+    this->setInterrupt(0x20, (uint32_t)default_handler);
+    this->setInterrupt(0x21, (uint32_t)keyboard_handler);
+
+    this->idt_install();
+
+    this->init_pic();
+
+    asm volatile ("sti");
+
+    //print_string("IDT Initialized\n");
+
+    return;
+
+}
+
+// PIC remapping and masking
+void InterruptManager::init_pic() {
+    outb(PIC_MASTER_COMMAND_PORT, 0x11); // initialise the configuration
+    outb(PIC_SLAVE_COMMAND_PORT, 0x11);
+
+    outb(PIC_MASTER_DATA_PORT, 0x20); // set start of interrupts number
+    outb(PIC_SLAVE_DATA_PORT, 0x28);
+
+    outb(PIC_MASTER_DATA_PORT, 0x04); // set the connection between Slave and Master PICs
+    outb(PIC_SLAVE_DATA_PORT, 0x02);
+
+    outb(PIC_MASTER_DATA_PORT, 0x1); // 8086 environment
+    outb(PIC_SLAVE_DATA_PORT, 0x1);
+
+    outb(PIC_MASTER_DATA_PORT, 0xFD); // mask all interrupts except IRQ1
+    outb(PIC_SLAVE_DATA_PORT, 0xFF); // mask all interrupts
+
+    return;
+}
+
+
+InterruptManager::InterruptManager() {
+    for (int i=0; i<this->interrupt_nb; this->resetInterrupt(i++)); // reset all interruptions catchings
+}

@@ -1,7 +1,6 @@
 #include "strings.hpp"
 #include "math.hpp"
 #include "types.hpp"
-#include "utils.hpp"
 
 
 // get the size of a string (before '\0')
@@ -65,7 +64,6 @@ bool itoa(int value, int buffer_size, char* buffer, int base) {
     value = sav_value;
 
     while (power_base >= 0) {
-		print_string("a");
 		if (buffer_size < 0) {
 			return false;
 		}
@@ -152,11 +150,6 @@ bool in_format_factor(char* format, char* text, int nb_args, void * arg, ...) { 
 				case 'c': // char
 
 					*(char*)(args[arg_index]) = text[text_index];
-
-					print_char(text[text_index]);
-					print_char(' ');
-					print_int(args);
-					print_string("\n");
 
 					arg_index += 1;
 					format_index+=2;

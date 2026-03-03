@@ -1,10 +1,11 @@
 #include "types.hpp"
-#include "InterruptDescriptorTable.hpp"
+#include "interrupt_descriptor_table.hpp"
 #include "math.hpp"
 #include "utils.hpp"
 #include "strings.hpp"
 #include "keyboard.hpp"
 #include "heap.hpp"
+#include "ioport.hpp"
 
 
 
@@ -15,7 +16,10 @@ extern "C" void main() {
 
 
     print_string("Loading IDT Kernel\n");
-    init_idt();
+    
+    InterruptManager itrManager = InterruptManager();
+    itrManager.init();
+    
     init_heap();
 
     print_clearall();
@@ -26,9 +30,13 @@ extern "C" void main() {
     while (1) {
         print_string(">> ");
         scan_keyboard(buffer, 128, true);
+        
+        if (strcmp(buffer, "exit")) {
+            print_clearall();
+            return;
+        }
+
         print_string(buffer);
         print_string("\n");
-
-        if (strcmp(buffer, "exit")) return;
     }
 }

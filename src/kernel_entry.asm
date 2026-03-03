@@ -2,6 +2,9 @@
 [extern main]
 call main
 
+death:
+    jmp death
+
 global load_idt
 load_idt:
     push ebx
