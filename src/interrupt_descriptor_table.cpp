@@ -44,7 +44,6 @@ void InterruptManager::init() {
     asm volatile ("cli");
 
     this->setInterrupt(0x20, (uint32_t)default_handler);
-    this->setInterrupt(0x21, (uint32_t)keyboard_handler);
 
     this->idt_install();
 

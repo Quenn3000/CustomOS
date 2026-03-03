@@ -36,7 +36,7 @@ const char shifted_scancode_to_ascii[] = {
 
 
 // keyboard interrupts handler
-extern "C" __attribute__((interrupt)) void keyboard_handler(IDTEntry* entry) {
+extern "C" __attribute__((interrupt)) void keyboard_handler(uint64_t* entry) {
 
     uint8_t scancode = inb(0x60);
 
@@ -57,7 +57,7 @@ extern "C" __attribute__((interrupt)) void keyboard_handler(IDTEntry* entry) {
     return;
 }
 
-extern "C" __attribute__((interrupt)) void default_handler(IDTEntry* entry) {
+extern "C" __attribute__((interrupt)) void default_handler(uint64_t* entry) {
     // You can print something or halt
     outb(PIC_MASTER_COMMAND_PORT, 0x20);
 }

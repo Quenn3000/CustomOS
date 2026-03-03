@@ -19,6 +19,8 @@ extern "C" void main() {
     
     InterruptManager itrManager = InterruptManager();
     itrManager.init();
+
+    KeyboardDriver keyboardDriver = KeyboardDriver(&itrManager);
     
     init_heap();
 
@@ -29,7 +31,7 @@ extern "C" void main() {
     char buffer[128];
     while (1) {
         print_string(">> ");
-        scan_keyboard(buffer, 128, true);
+        keyboardDriver.scan_keyboard(buffer, 128, true);
         
         if (strcmp(buffer, "exit")) {
             print_clearall();

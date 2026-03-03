@@ -1,20 +1,31 @@
 #include "keyboard.hpp"
 #include "types.hpp"
 #include "interrupt_handlers.hpp"
+#include "interrupt_descriptor_table.hpp"
 #include "utils.hpp"
+#include "ioport.hpp"
+
+KeyboardDriver* KeyboardDriver::instance = nullptr;
 
 // init all the keyboard related variables
-void init_keyboard() {
+KeyboardDriver::KeyboardDriver(InterruptManager* itrManager) {
+
+	itrManager->setInterrupt(0x21, KeyboardDriver::interrupt_handler);
+
+	KeyboardDriver::instance = this;
 	for (int i=0; i<256; i++) {
-		KEY_PRESSED[i] = false;
+		this->KEY_PRESSED[i] = false;
 	}
+
+	this->KEYBOARD_BUFFER = 0;
+
 }
 
 // get a character from the keyboard
-char getch() {
-    if (KEYBOARD_BUFFER != 0) {
-		char c = KEYBOARD_BUFFER;
-		KEYBOARD_BUFFER = 0;
+char KeyboardDriver::getch() {
+    if (this->KEYBOARD_BUFFER != 0) {
+		char c = this->KEYBOARD_BUFFER;
+		this->KEYBOARD_BUFFER = 0;
 		return c;
 	}
 
@@ -22,16 +33,16 @@ char getch() {
 }
 
 // get all keys from the keyboard into the buffer, until an '\n' occur
-bool scan_keyboard(char* buff, int buff_size, bool graphic) {
+bool KeyboardDriver::scan_keyboard(char* buff, int buff_size, bool graphic) {
 	
 	int index=-1;
 	do {
 		index+=1;
 
-		KEYBOARD_BUFFER = 0;
-		while (KEYBOARD_BUFFER == 0 || (KEYBOARD_BUFFER == '\b' && index<=0));
+		this->KEYBOARD_BUFFER = 0;
+		while (this->KEYBOARD_BUFFER == 0 || (this->KEYBOARD_BUFFER == '\b' && index<=0));
 
-		if (KEYBOARD_BUFFER == '\b') {
+		if (this->KEYBOARD_BUFFER == '\b') {
 			buff[index-1] = '\0';
 			index -=2;
 			if (graphic) {
@@ -39,7 +50,7 @@ bool scan_keyboard(char* buff, int buff_size, bool graphic) {
 				set_cursor(-1, true);
 			}
 		} else {
-			buff[index] = KEYBOARD_BUFFER;
+			buff[index] = this->KEYBOARD_BUFFER;
 			
 			if (graphic)
 				print_char(buff[index]);
