@@ -1,6 +1,6 @@
-#include "types.hpp"
-#include "heap.hpp"
-#include "utils.hpp"
+#include <types.hpp>
+#include <heap.hpp>
+#include <utils.hpp>
 
 char heap[HEAP_SIZE] = {0};
 HeapChunk heap_chunks[HEAPCHUNK_NUMBER];

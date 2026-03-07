@@ -1,7 +1,7 @@
 #pragma once
 
-#include "types.hpp"
-#include "utils.hpp"
+#include <types.hpp>
+#include <utils.hpp>
 
 #define IDT_SIZE 256 // 256 possible interrupts
 

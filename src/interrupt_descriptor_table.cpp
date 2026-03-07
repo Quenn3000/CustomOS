@@ -1,7 +1,7 @@
-#include "interrupt_descriptor_table.hpp"
-#include "utils.hpp"
-#include "interrupt_handlers.hpp"
-#include "ioport.hpp"
+#include <interrupt_descriptor_table.hpp>
+#include <utils.hpp>
+#include <interrupt_handlers.hpp>
+#include <ioport.hpp>
 
 // https://pdos.csail.mit.edu/6.828/2005/readings/i386/s09_05.htm
 
@@ -59,20 +59,27 @@ void InterruptManager::init() {
 
 // PIC remapping and masking
 void InterruptManager::init_pic() {
-    outb(PIC_MASTER_COMMAND_PORT, 0x11); // initialise the configuration
-    outb(PIC_SLAVE_COMMAND_PORT, 0x11);
+    Port8Bit master_command_port(PIC_MASTER_COMMAND_PORT);
+    Port8Bit slave_command_port(PIC_SLAVE_COMMAND_PORT);
 
-    outb(PIC_MASTER_DATA_PORT, 0x20); // set start of interrupts number
-    outb(PIC_SLAVE_DATA_PORT, 0x28);
+    Port8Bit master_data_port(PIC_MASTER_DATA_PORT);
+    Port8Bit slave_data_port(PIC_SLAVE_DATA_PORT);
+    
 
-    outb(PIC_MASTER_DATA_PORT, 0x04); // set the connection between Slave and Master PICs
-    outb(PIC_SLAVE_DATA_PORT, 0x02);
+    master_command_port.write(0x11); // initialise the configuration
+    slave_command_port.write(0x11);
 
-    outb(PIC_MASTER_DATA_PORT, 0x1); // 8086 environment
-    outb(PIC_SLAVE_DATA_PORT, 0x1);
+    master_data_port.write(0x20); // set start of interrupts number
+    slave_data_port.write(0x28);
 
-    outb(PIC_MASTER_DATA_PORT, 0xFD); // mask all interrupts except IRQ1
-    outb(PIC_SLAVE_DATA_PORT, 0xFF); // mask all interrupts
+    master_data_port.write(0x04); // set the connection between Slave and Master PICs
+    slave_data_port.write(0x02);
+
+    master_data_port.write(0x1); // 8086 environment
+    slave_data_port.write(0x1);
+
+    master_data_port.write(0xFD); // mask all interrupts except IRQ1
+    slave_data_port.write(0xFF); // mask all interrupts
 
     return;
 }

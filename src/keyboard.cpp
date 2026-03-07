@@ -1,9 +1,9 @@
-#include "keyboard.hpp"
-#include "types.hpp"
-#include "interrupt_handlers.hpp"
-#include "interrupt_descriptor_table.hpp"
-#include "utils.hpp"
-#include "ioport.hpp"
+#include <keyboard.hpp>
+#include <types.hpp>
+#include <interrupt_handlers.hpp>
+#include <interrupt_descriptor_table.hpp>
+#include <utils.hpp>
+#include <ioport.hpp>
 
 KeyboardDriver* KeyboardDriver::instance = nullptr;
 

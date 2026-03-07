@@ -1,4 +1,4 @@
-#include "math.hpp"
+#include <math.hpp>
 
 // x to the power y
 int power_int(int x, int y) {

@@ -1,6 +1,6 @@
-#include "strings.hpp"
-#include "math.hpp"
-#include "types.hpp"
+#include <strings.hpp>
+#include <math.hpp>
+#include <types.hpp>
 
 
 // get the size of a string (before '\0')
