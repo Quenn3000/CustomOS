@@ -5,6 +5,7 @@
 #include <strings.hpp>
 #include <keyboard.hpp>
 #include <heap.hpp>
+#include <PCIController.hpp>
 
 
 
@@ -25,6 +26,10 @@ extern "C" void main() {
 
     print_clearall();
     print_string((char*)&title);
+
+    PeriphericalComponnentInterconnectController PCIController;
+
+    PCIController.print_devices();
 
 
     char buffer[128];
