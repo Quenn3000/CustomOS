@@ -110,13 +110,13 @@ GDT_start:
         dd 0x0
         dd 0x0
 
-    GDT_code:
+    GDT_code: ; cette section sera le modèle de description
         dw 0xffff ; size of the segment
         dw 0x0 ; base of the semgment
-        db 0x0
-        db 0b10011010
-        db 0b11001111
-        db 0x0
+        db 0x0 ; (this is also the base)
+        db 0b10011010 ; 1 : present bit, 00 : privilege (here ring 0 : kernel), 1 : descriptor (code/data here), 1010 : executable, non-conforming, readable
+        db 0b11001111 ; FLAGS : 4Kb granularity, 32 bits
+        db 0x0 ; base again (hight bits)
 
     GDT_data:
         dw 0xffff
