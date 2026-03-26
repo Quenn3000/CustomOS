@@ -78,7 +78,7 @@ void InterruptManager::init_pic() {
     master_data_port.write(0x1); // 8086 environment
     slave_data_port.write(0x1);
 
-    master_data_port.write(0xFD); // mask all interrupts except IRQ1
+    master_data_port.write(0xFD); // mask all interrupts except IRQ1 and IRQ0 : mask 11111100
     slave_data_port.write(0xFF); // mask all interrupts
 
     return;

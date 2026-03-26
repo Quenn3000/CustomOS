@@ -1,9 +1,11 @@
 [org 0x7c00]
-KERNEL_LOCATION equ 0x1000
+KERNEL_LOCATION equ 0x1000 ; address of the kernel entry point location
                                     
 
 mov [BOOT_DISK], dl
-                                    
+
+
+; --- load the kernel into the RAM ---
 xor ax, ax  ; set ax to 0
 mov es, ax
 mov ds, ax
@@ -19,58 +21,88 @@ mov ch, 0x00
 mov dh, 0x00
 mov cl, 0x02
 mov dl, [BOOT_DISK]
-int 0x13
+int 0x13 ;BIOS call, here is the doc : https://wiki.osdev.org/Disk_access_using_the_BIOS_(INT_13h)
 
 cmp ah, 0x00
-je pass ; test failure
+je .pass ; test failure
 
-mov bx, msg_failure ; A-Q : error from 01h to 11h
-call print_string   ; si minuscule : la position de la lettre dans l'alphabet correspond au numero de dizaine de l'erreur (en hex)
-cmp ah, 0x19
-mov al, ah
-jns high_failure
+.failure:
 
-add al, 0x40
-mov ah, 0x0e
-int 0x10
-jmp stop
+    mov bx, msg_failure ; A-Q : error from 01h to 11h
+    call .print_string   ; si minuscule : la position de la lettre dans l'alphabet correspond au numero de dizaine de l'erreur (en hex)
+    cmp ah, 0x19
+    mov al, ah
+    jns .high_failure
 
-high_failure:
-shr al, 4
-add al, 0x61
-mov ah, 0x0e
-int 0x10
-jmp stop
+    add al, 0x40
+    mov ah, 0x0e
+    int 0x10
+    jmp .stop
+
+.high_failure:
+    shr al, 4
+    add al, 0x61
+    mov ah, 0x0e
+    int 0x10
+    jmp .stop
 
 
-stop:
-    jmp stop
+.stop:
+    jmp .stop
 
-pass:
+.pass:
 
-                                    
+
+; --- change to text mode ---
 mov ah, 0x0
 mov al, 0x3
-int 0x10        ; text mode
-
-
-CODE_SEG equ GDT_code - GDT_start
-DATA_SEG equ GDT_data - GDT_start
+int 0x10    ; BIOS call, here is the doc : https://en.wikipedia.org/wiki/INT_10H
 
 
 mov ah, 0x0F    ; BIOS: Get current video mode
 int 0x10        ; Call BIOS
 mov [0x044A], ah  ; Store screen width (AH contains width)
 
+
+; --- here is the part who get memory mapping ---
+mov ebx, 0
+
+mov eax, 0xE820 ; function number to use. Here is the doc : http://www.uruk.org/orig-grub/mem64mb.html
+mov ecx, 24 ; size of one MemoryMapEntry
+mov di, 0x9000 ; address to store all MemoryMapEntries
+mov edx, 0x534D4150 ; magic number
+mov [memory_map_count], 0 ; set memory_map_count to 0
+
+.get_memory_map:
+    int 15h ; BIOS call
+    jc .memory_mapped ; test if it crashed or it got an error
+    cmp eax, 0x534D4150 ; test if the magic number is set into eax; it mean all worked
+    jne .failure
+    add es:di, 24; add 24 to the address to store the next MemoryMapEntry
+    inc word [memory_map_count] ; increment memory_map_count
+    cmp ebx, 0
+    jne .get_memory_map
+
+
+.memory_mapped:
+    cmp word [memory_map_count], 0
+    je .failure ; BIOS does not support E820 function
+
+; --- description of the GlobalDescriptoTable and loading
+CODE_SEG equ GDT_code - GDT_start
+DATA_SEG equ GDT_data - GDT_start
+
 cli
 lgdt [GDT_descriptor]
 mov eax, cr0
 or eax, 1
 mov cr0, eax
-jmp CODE_SEG:start_protected_mode
+jmp CODE_SEG:.start_protected_mode
 
 jmp $
-                                    
+
+
+
 BOOT_DISK: db 0
 
 GDT_start:
@@ -101,27 +133,30 @@ GDT_descriptor:
     dd GDT_start
 
 
-print_string:
+msg_failure: db "Loading failed, error : ", 0
+memory_map_count : dw 0x8FFE ; address of memory_map_counter (declared in memory_management.hpp)
+
+
+; --- * print_string function ---
+.print_string:
     push ax
     mov ah, 0x0e
-    print_string_loop:
+    .print_string_loop:
         mov al, [bx]
         cmp al, 0
-        je print_string_end
+        je .print_string_end
         int 0x10
         inc bx
-        jmp print_string_loop
+        jmp .print_string_loop
     
-    print_string_end:
+    .print_string_end:
     
     pop ax
     ret
 
-
-msg_failure: db "Loading failed, error : ", 0
-
+; --- Switch into 32bits protected mode
 [bits 32]
-start_protected_mode:
+.start_protected_mode:
     mov ax, DATA_SEG
 	mov ds, ax
 	mov ss, ax
@@ -136,5 +171,5 @@ start_protected_mode:
 
                                      
  
-times 510-($-$$) db 0              
-dw 0xaa55
+times 510-($-$$) db 0 ; fill the end with zeros      
+dw 0xaa55 ; magic number for the OS to be detected

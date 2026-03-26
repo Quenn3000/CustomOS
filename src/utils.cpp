@@ -1,6 +1,7 @@
 #include <utils.hpp>
 #include <types.hpp>
 #include <math.hpp>
+#include <ioport.hpp>
 
 uint16_t* cursor;
 
@@ -126,6 +127,58 @@ bool print_int(int x, int base) {
         x-= (x/power_int(base, power_base)) * power_int(base, power_base);
 
         cursor+=1;
+        power_base-=1;
+    }
+
+    return true;
+}
+
+
+// --- DEBUG ---
+
+void debug_string(char const* str) {
+    Port8Bit debug_out(OUTPUT_SERIAL_PORT); // port serial de sortie pour qemu
+
+    for (int i=0; str[i] != '\0'; i++) {
+        debug_out.write(str[i]);
+    }
+
+}
+
+
+// debug an int on the current cursor position
+bool debug_int(int x, int base) {
+    if (base < 2 || base > 32) {
+        return false;
+    }
+
+    if (x < 0) {
+        char n[] = "-";
+        debug_string(n);
+        x = -x;
+    }
+
+    int sav_x = x;
+    int power_base = 0;
+
+    while (x >= base) {
+        x = x / base;
+        power_base++;
+    }
+
+    x = sav_x;
+
+    Port8Bit debug_out(OUTPUT_SERIAL_PORT);
+
+    while (power_base >= 0) {
+        int to_print = x/power_int(base, power_base);
+        if (to_print <= 9) {
+            debug_out.write((char) (48 + to_print));
+        } else {
+            debug_out.write((char) (55 + to_print));
+        }
+        x-= (x/power_int(base, power_base)) * power_int(base, power_base);
+
         power_base-=1;
     }
 

@@ -1,0 +1,4 @@
+address of the kernel location harcoded in bootloader.asm at "KERNEL_LOCATION equ 0x1000" and in the Makefile (in the linker section)
+address of the 32 bits stack harcoded in bootloader.asm before this comment : 32 bit stack base pointer
+MEMORY_MAP_ENTRIES_ADDRESS harcoded in memory_management.hpp and in bootloader.asm
+MEMORY_MAP_ENTRIES_COUNTER_ADDRESS harcoded in memory_management.hpp and in bootloader.asm

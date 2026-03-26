@@ -6,10 +6,12 @@
 #include <keyboard.hpp>
 #include <heap.hpp>
 #include <PCIController.hpp>
+#include <memory_management.hpp>
 
 
 
 extern "C" void main() {
+    debug_string("Lancement du kernel\n\n");
     set_cursor();
 
     char title[] = "           _____                        _        ____   _____\n          / ____|                      (_)      / __ \\ / ____|\n         | (___   __ _ _ __   __ _ _ __ _  __ _| |  | | (___\n          \\___ \\ / _` | '_ \\ / _` | '__| |/ _` | |  | |\\___ \\\n          ____) | (_| | | | | (_| | |  | | (_| | |__| |____) |\n         |_____/ \\__,_|_| |_|\\__, |_|  |_|\\__,_|\\____/|_____/\n                              __/ |\n                             |___/\n";

@@ -1,0 +1,13 @@
+L'idée pour le tas, c'est de faire un tableau de blocks d'une certaine taille.
+En parralèle, on a un autre tableau de la taille du nombre de blocks. Celui ci contient les données :
+- taille du block
+- est utilisé
+
+
+règles :
+	- heap_chunks[heap_used_index].used = false
+
+
+malloc :
+	cherche la plus petite taille disponible assez grande pour entrer l'objet
+	met à jours le tableau de chunck
