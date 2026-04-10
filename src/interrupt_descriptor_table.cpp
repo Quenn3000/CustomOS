@@ -7,23 +7,29 @@
 
 
 bool InterruptManager::set_interrupt(int n, uint32_t handler) {
-    bool res = !( this->idt[n].offset_low || this->idt[n].offset_high ); // check si un handler avait déjà été renseigné pour la fonction
-
+    if (this->idt[n].offset_low || this->idt[n].offset_high || n >= this->nb_interrupt) { // check si un handler avait déjà été renseigné pour la fonction
+        return false;
+    }
     this->idt[n].offset_low = handler & 0xFFFF;
     this->idt[n].selector = 0x08; // Kernel code segment
     this->idt[n].zero = 0;
     this->idt[n].type_attr = 0x8E; // 32-bit interrupt gate
     this->idt[n].offset_high = (handler >> 16) & 0xFFFF;
 
-    return res;
+    return true;
 }
 
-void InterruptManager::reset_interrupt(int n) {
+bool InterruptManager::reset_interrupt(int n) {
+    if (n >= this->nb_interrupt) {
+        return false;
+    }
     this->idt[n].offset_low = 0;
     this->idt[n].selector = 0; // Kernel code segment
     this->idt[n].zero = 0;
     this->idt[n].type_attr = 0; // 32-bit interrupt gate
     this->idt[n].offset_high = 0;
+
+    return true;
 }
 
 // set all parameters to call correctly load_idt
@@ -31,12 +37,7 @@ void InterruptManager::idt_install() {
     this->idt_ptr.limit = (sizeof(IDTEntry) * IDT_SIZE) - 1;
     this->idt_ptr.base = (uint32_t)&idt;
 
-    //print_int((int)&idt_ptr);
-
     load_idt(&this->idt_ptr);
-
-
-    //print_string("IDT installed\n");
 }
 
 // global function for initializing IDT
@@ -50,11 +51,6 @@ void InterruptManager::init() {
     this->init_pic();
 
     asm volatile ("sti");
-
-    //print_string("IDT Initialized\n");
-
-    return;
-
 }
 
 // PIC remapping and masking
@@ -80,11 +76,9 @@ void InterruptManager::init_pic() {
 
     master_data_port.write(0xFD); // mask all interrupts except IRQ1 and IRQ0 : mask 11111100
     slave_data_port.write(0xFF); // mask all interrupts
-
-    return;
 }
 
 
 InterruptManager::InterruptManager() {
-    for (int i=0; i<this->interrupt_nb; this->reset_interrupt(i++)); // reset all interruptions catchings
+    for (int i=0; i<this->nb_interrupt; this->reset_interrupt(i++)); // reset all interruptions catchings
 }

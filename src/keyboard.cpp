@@ -5,14 +5,16 @@
 #include <utils.hpp>
 #include <ioport.hpp>
 
-KeyboardDriver* KeyboardDriver::instance = nullptr;
+KeyboardDriver* KeyboardDriver::_instance_address = nullptr;
+
 
 // init all the keyboard related variables
 KeyboardDriver::KeyboardDriver(InterruptManager* itrManager) {
 
+	this->_instance_address = this;
+
 	itrManager->set_interrupt(0x21, (uint32_t)KeyboardDriver::interrupt_handler);
 
-	KeyboardDriver::instance = this;
 	for (int i=0; i<256; i++) {
 		this->KEY_PRESSED[i] = false;
 	}

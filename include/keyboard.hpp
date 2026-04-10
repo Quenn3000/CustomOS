@@ -11,11 +11,7 @@
 class KeyboardDriver {
 
 	public:
-		KeyboardDriver(InterruptManager* itrManager);
-		char getch();
-		bool scan_keyboard(char* buff, int buff_size, bool graphic);
-
-		const char scancode_to_ascii[58] = {
+		static constexpr char scancode_to_ascii[58] = {
 			0,  27, '&', '~', '\"', '\'', '(', '-',
 			'`','_','^','@',')','=', '\b', '\t',
 			'a','z','e','r','t','y','u','i',
@@ -26,7 +22,7 @@ class KeyboardDriver {
 			0,  ' '
 		};
 		
-		const char shifted_scancode_to_ascii[58] = {
+		static constexpr char shifted_scancode_to_ascii[58] = {
 			0, 27, '1', '2', '3', '4', '5', '6',
 			'7', '8', '9', '0', ')', '+', '\b', '\t',
 			'A','Z','E','R','T','Y','U','I',
@@ -37,12 +33,32 @@ class KeyboardDriver {
 			0,  ' '
 		};
 
+		static KeyboardDriver& Instance(InterruptManager* itrManager) {
+			static KeyboardDriver _instance(itrManager);
+			KeyboardDriver::_instance_address = &_instance;
+		
+			return _instance;
+		}
+
+
+		char getch();
+		bool scan_keyboard(char* buff, int buff_size, bool graphic);
+	
+	protected:
+		KeyboardDriver(InterruptManager* itrManager);
+
+
 	private:
-		static KeyboardDriver* instance;
+
+		static KeyboardDriver* _instance_address;
+
 		bool KEY_PRESSED[256];
 		char KEYBOARD_BUFFER;
 
 		static __attribute__((interrupt)) void interrupt_handler(IDTEntry* entry) {
+			if (_instance_address == nullptr)
+				return;
+
 			Port8Bit master_port(PIC_MASTER_COMMAND_PORT);
 			Port8Bit input_port(0x60);
 
@@ -51,13 +67,13 @@ class KeyboardDriver {
 		    bool pressed = !(scancode & 128);
 		    scancode &= 127;
 
-		    uint8_t ascii = instance->scancode_to_ascii[scancode];
+		    uint8_t ascii = _instance_address->scancode_to_ascii[scancode];
 
 		    if (pressed) {
-		        instance->KEY_PRESSED[ascii] = true;
-		        instance->KEYBOARD_BUFFER = (instance->KEY_PRESSED[LSHIFT] || instance->KEY_PRESSED[RSHIFT]) ? instance->shifted_scancode_to_ascii[scancode] : ascii;
+		        _instance_address->KEY_PRESSED[ascii] = true;
+		        _instance_address->KEYBOARD_BUFFER = (_instance_address->KEY_PRESSED[LSHIFT] || _instance_address->KEY_PRESSED[RSHIFT]) ? _instance_address->shifted_scancode_to_ascii[scancode] : ascii;
 		    } else {
-		        instance->KEY_PRESSED[ascii] = false;
+		        _instance_address->KEY_PRESSED[ascii] = false;
 			}
 		    master_port.write(0x20);
 

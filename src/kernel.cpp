@@ -20,14 +20,12 @@ extern "C" void main() {
     InterruptManager itrManager = InterruptManager();
     itrManager.init();
 
-    KeyboardDriver keyboardDriver = KeyboardDriver(&itrManager);
+    KeyboardDriver& keyboardDriver = KeyboardDriver::Instance(&itrManager);
     
     MemoryManager* memory_manager = MemoryManager::Instance();
 
     print_clearall();
     print_string((char*)&title);
-
-    //uint16_t* caca = "Hello World!";
 
     PeriphericalComponnentInterconnectController PCIController;
 
@@ -35,16 +33,6 @@ extern "C" void main() {
 
 
     PCIController.print_devices();
-
-    unsigned int x = 12;
-    char buffer_test[1000];
-    char c = 'x';
-    if (out_format_factor("test de x = %ud, c = %c\n", (char*)&buffer_test, 1000, 2, &x, &c)) {
-        print_string("Test reussi\n");
-    } else {
-        print_string("Test rate\n");
-    }
-    print_string(buffer_test);
 
 
     char buffer[128];

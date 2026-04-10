@@ -1,7 +1,9 @@
 SRC_PATH = src/
 RES_PATH = res/
 HEADER_PATH = include/
-CFLAGS = -I $(HEADER_PATH) -ffreestanding -mgeneral-regs-only -m32 -g -fno-pie -fno-use-cxa-atexit -nostdlib -fno-builtin -fno-rtti -fno-exceptions -fno-leading-underscore -fpermissive -fno-stack-protector
+CFLAGS = -I $(HEADER_PATH) -ffreestanding -mgeneral-regs-only -m32 -g -fno-pie -fno-use-cxa-atexit -nostdlib -fno-builtin -fno-rtti -fno-exceptions -fno-leading-underscore -fpermissive -fno-stack-protector -fno-threadsafe-statics
+# -fno-threadsafe-statics : désactive la protection contre les accès concurrents lors de l'initialisation des variables statiques locales
+# de toute façon il peut pas appeler les fonctions qui le permettent vu qu'elles n'existent pas chez moi HAHAHA
 objects = kernel_entry.o kernel.o math.o ioport.o utils.o interrupt_descriptor_table.o strings.o interrupt_handlers.o PCIController.o keyboard.o memory_management.o
 objects_target = $(addprefix $(RES_PATH),$(objects))
 

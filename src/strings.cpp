@@ -39,19 +39,23 @@ int atoi(char* s, int base) {
 	return res;
 }
 
-// convert an int into a string in the buffer, in the base you want (return if the operation was a success or it failed)
-bool itoa(int value, int buffer_size, char* buffer, int base) {
+// convert an int into a string in the buffer, in the base you want (return the number of digits, 0 if failed)
+int itoa(int value, int buffer_size, char* buffer, int base) {
+	int nb_digit = 0;
+
 	if (base < 2 || base > 32) {
-        return false;
+        return 0;
     }
 
     if (value < 0) {
 		if (buffer_size-- <= 0) {
-			return false;
+			return 0;
 		}
         buffer[0] = '-';
 		buffer+=1;
         value = -value;
+
+		nb_digit += 1;
     }
 
     int sav_value = value;
@@ -62,11 +66,13 @@ bool itoa(int value, int buffer_size, char* buffer, int base) {
         power_base++;
     }
 
+	nb_digit += power_base+1;
+
     value = sav_value;
 
     while (power_base >= 0) {
 		if (buffer_size < 0) {
-			return false;
+			return 0;
 		}
 		
         int to_print = value/power_int(base, power_base);
@@ -84,23 +90,78 @@ bool itoa(int value, int buffer_size, char* buffer, int base) {
     }
 
 	if (buffer_size <= 0) {
-		return false;
+		return 0;
 	}
 
 	buffer[0] = '\0';
 
-    return true;
+    return nb_digit;
+}
+
+
+// convert an unsigned int into a string in the buffer, in the base you want (return the number of digits, 0 if failed)
+int uitoa(unsigned int value, int buffer_size, char* buffer, int base) {
+	if (base < 2 || base > 32) {
+        return 0;
+    }
+
+    unsigned int sav_value = value;
+    int power_base = 0;
+
+    while (value >= base) {
+        value = value / base;
+        power_base++;
+    }
+
+	int nb_digit = power_base+1;
+
+    value = sav_value;
+
+    while (power_base >= 0) {
+		if (buffer_size < 0) {
+			return 0;
+		}
+		
+        int to_print = value/power_int(base, power_base);
+        if (to_print <= 9) {
+            buffer[0] = 48 + (to_print);
+        } else {
+            buffer[0] = 55 + (to_print);
+        }
+        value-= (value/power_int(base, power_base)) * power_int(base, power_base);
+
+		buffer_size--;
+		buffer+=1;
+
+        power_base-=1;
+    }
+
+	if (buffer_size <= 0) {
+		return 0;
+	}
+
+	buffer[0] = '\0';
+
+    return nb_digit;
 }
 
 
 // compare two strings (basic comparison, only if it is equals)
-bool strcmp(const char s1[], const char s2[]) {
-	if (strlen(s1) != strlen(s2)) return false;
+int strcmp(const char s1[], const char s2[]) {
 
-	while (*s1 != '\0')
-		if (*s1++ != *s2++) return false;
+	while (*s1 != '\0' || *s2 != '\0')
+		if (*s1++ != *s2++) {
+			s1-=2;
+			s2-=2;
+			if (s1++ == 0)
+				return -1;
+			else if (s2++ == 0)
+				return 1;
+			
+			return *s1 < *s2 ? -1 : 1;
+		}
 	
-	return true;
+	return 0;
 }
 
 
@@ -197,8 +258,8 @@ int out_format_factor(const char* format, char* buffer, int buffer_size, int nb_
 				return -1;
 			int base = 0;
 			int power_base = 0;
+			int nb_digit = 0;
 			int64_t x;
-			int64_t sav_x;
 
 			uint64_t ux;
 			uint64_t usav_x;
@@ -216,35 +277,12 @@ int out_format_factor(const char* format, char* buffer, int buffer_size, int nb_
 
 					x = *(int*)(args[arg_index]);
 
-					if (x < 0) {
-						buffer[buffer_index++] = '-';
-						x = -x;
+					nb_digit = itoa(x, buffer_size-buffer_index, &buffer[buffer_index], base);
+					if (!nb_digit) {
+						print_string("itoa not good\n");
+						return -2;
 					}
-				
-					sav_x = x;
-					power_base = 0;
-				
-					while (x >= base) {
-						x = x / base;
-						power_base++;
-					}
-				
-					x = sav_x;
-				
-					while (power_base >= 0) {
-						if (buffer_index >= buffer_size) // sécurité pour le buffer
-							return -2;
-
-						int to_print = x/power_int(base, power_base);
-						if (to_print <= 9) {
-							buffer[buffer_index++] = 48 + (to_print);
-						} else {
-							buffer[buffer_index++] = 55 + (to_print);
-						}
-						x-= (x/power_int(base, power_base)) * power_int(base, power_base);
-						power_base-=1;
-					}
-					break;
+					buffer_index+= nb_digit;
 				
 
 				// unsigned int
@@ -262,32 +300,15 @@ int out_format_factor(const char* format, char* buffer, int buffer_size, int nb_
 								base = 2;
 
 							ux = *(unsigned int*)(args[arg_index]);
-						
-							usav_x = ux;
-							power_base = 0;
-						
-							while (ux >= base) {
-								ux = ux / base;
-								power_base++;
-							}
-						
-							ux = usav_x;
-						
-							while (power_base >= 0) {
-								if (buffer_index >= buffer_size) // sécurité pour le buffer
-									return -2;
 
-								int to_print = ux/power_int(base, power_base);
-								
-								if (to_print <= 9) {
-									buffer[buffer_index++] = 48 + (to_print);
-								} else {
-									buffer[buffer_index++] = 55 + (to_print);
-								}
-								ux-= (ux/power_int(base, power_base)) * power_int(base, power_base);
-								power_base-=1;
+							nb_digit = uitoa(ux, buffer_size-buffer_index, &buffer[buffer_index], base);
+							if (!nb_digit) {
+								print_string("itoa not good\n");
+								return -2;
 							}
-							break;
+							buffer_index+= nb_digit;
+						
+							
 					}
 					
 					format_index+=1;
