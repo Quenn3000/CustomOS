@@ -10,7 +10,7 @@ KeyboardDriver* KeyboardDriver::instance = nullptr;
 // init all the keyboard related variables
 KeyboardDriver::KeyboardDriver(InterruptManager* itrManager) {
 
-	itrManager->setInterrupt(0x21, (uint32_t)KeyboardDriver::interrupt_handler);
+	itrManager->set_interrupt(0x21, (uint32_t)KeyboardDriver::interrupt_handler);
 
 	KeyboardDriver::instance = this;
 	for (int i=0; i<256; i++) {

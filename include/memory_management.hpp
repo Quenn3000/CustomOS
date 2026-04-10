@@ -12,5 +12,20 @@ struct MemoryMapEntry {
 	uint32_t attributes;
 } __attribute__((packed));
 
-extern MemoryMapEntry* memory_map;
-extern uint16_t* memory_map_counter;
+class MemoryManager {
+	public:
+		uint16_t memory_map_counter;
+		
+		static MemoryManager* Instance();
+
+		MemoryMapEntry* get_block(int i);
+	
+	protected:
+		MemoryManager();
+
+	private:
+		static MemoryManager* _instance_address;
+		static MemoryManager _instance;
+	
+		MemoryMapEntry* memory_map;
+};

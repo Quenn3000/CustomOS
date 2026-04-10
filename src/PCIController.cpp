@@ -33,12 +33,12 @@ void PeriphericalComponnentInterconnectController::write(uint8_t bus, uint16_t d
 	dataPort.write(value);
 }
 
-bool PeriphericalComponnentInterconnectController::deviceHasFunction(uint8_t bus, uint16_t device) {
+bool PeriphericalComponnentInterconnectController::device_has_function(uint8_t bus, uint16_t device) {
 	return this->read(bus, device, 0, 0x0E) & (1<<7);
 }
 
 
-PeriphericalComponnentInterconnectedDeviceDescriptor PeriphericalComponnentInterconnectController::getDeviceDescriptor(uint8_t bus, uint16_t device, uint8_t function) {
+PeriphericalComponnentInterconnectedDeviceDescriptor PeriphericalComponnentInterconnectController::get_device_descriptor(uint8_t bus, uint16_t device, uint8_t function) {
 	PeriphericalComponnentInterconnectedDeviceDescriptor res;
 
 	res.interrupt = this->read(bus, device, function, 0x3C);
@@ -64,9 +64,9 @@ PeriphericalComponnentInterconnectedDeviceDescriptor PeriphericalComponnentInter
 void PeriphericalComponnentInterconnectController::print_devices() {
 	for (int bus=0; bus<8; bus++) {
 		for (int device=0; device<32; device++) {
-			int function_nb = this->deviceHasFunction(bus, device) ? 8 : 1;
+			int function_nb = this->device_has_function(bus, device) ? 8 : 1;
 			for (int function=0; function<function_nb; function++) {
-				PeriphericalComponnentInterconnectedDeviceDescriptor dev = getDeviceDescriptor(bus, device, function);
+				PeriphericalComponnentInterconnectedDeviceDescriptor dev = get_device_descriptor(bus, device, function);
 
 				if (dev.vendor_id == 0x0000 || dev.vendor_id == 0xFFFF) {
 					continue;

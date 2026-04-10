@@ -1,10 +1,11 @@
 #include <strings.hpp>
 #include <math.hpp>
 #include <types.hpp>
+#include <utils.hpp>
 
 
 // get the size of a string (before '\0')
-int strlen(char* s) {
+int strlen(const char* s) {
 	int i;
 	for (i=0; s[i] != '\0'; i++);
 	return i;
@@ -93,7 +94,7 @@ bool itoa(int value, int buffer_size, char* buffer, int base) {
 
 
 // compare two strings (basic comparison, only if it is equals)
-bool strcmp(char s1[], char s2[]) {
+bool strcmp(const char s1[], const char s2[]) {
 	if (strlen(s1) != strlen(s2)) return false;
 
 	while (*s1 != '\0')
@@ -174,22 +175,150 @@ bool in_format_factor(char* format, char* text, int nb_args, void * arg, ...) { 
 }
 
 
-/*
-bool out_format_factor(char format, int buffer_size, char* buffer, int nb_args, void * arg, ...) {
+/* return value :
+1	: no error
+-1	: not enought variables informed
+-2	: buffer filled when treating a number
+-3	: not a good format after '%'
+-4	: buffer filled without '\0' at the end
+*/
+int out_format_factor(const char* format, char* buffer, int buffer_size, int nb_args, void * arg, ...) {
+	int buffer_index = 0;
 	int format_index = 0;
+	int arg_index = 0;
 	int format_length = strlen(format);
 
-	while (format_index < format_length) {
+	void** args = (void**)(&arg);
+
+
+	while (format_index <= format_length && buffer_index < buffer_size) {
 		if (format[format_index] == '%' && format_index+1 < format_length) {
+			if (arg_index >= nb_args)
+				return -1;
+			int base = 0;
+			int power_base = 0;
+			int64_t x;
+			int64_t sav_x;
+
+			uint64_t ux;
+			uint64_t usav_x;
 			switch (format[format_index+1]) {
+				// signed int
 				case 'd':
+					base = 10;
+
+				case 'x':
+					if (base == 0)
+						base = 16;
+				case 'b':
+					if (base == 0)
+						base = 2;
+
+					x = *(int*)(args[arg_index]);
+
+					if (x < 0) {
+						buffer[buffer_index++] = '-';
+						x = -x;
+					}
+				
+					sav_x = x;
+					power_base = 0;
+				
+					while (x >= base) {
+						x = x / base;
+						power_base++;
+					}
+				
+					x = sav_x;
+				
+					while (power_base >= 0) {
+						if (buffer_index >= buffer_size) // sécurité pour le buffer
+							return -2;
+
+						int to_print = x/power_int(base, power_base);
+						if (to_print <= 9) {
+							buffer[buffer_index++] = 48 + (to_print);
+						} else {
+							buffer[buffer_index++] = 55 + (to_print);
+						}
+						x-= (x/power_int(base, power_base)) * power_int(base, power_base);
+						power_base-=1;
+					}
 					break;
 				
+
+				// unsigned int
+				case 'u':
+				if (format_index+2 < format_length) {
+					switch (format[format_index+2]) {
+						case 'd':
+							base = 10;
+
+						case 'x':
+							if (base == 0)
+								base = 16;
+						case 'b':
+							if (base == 0)
+								base = 2;
+
+							ux = *(unsigned int*)(args[arg_index]);
+						
+							usav_x = ux;
+							power_base = 0;
+						
+							while (ux >= base) {
+								ux = ux / base;
+								power_base++;
+							}
+						
+							ux = usav_x;
+						
+							while (power_base >= 0) {
+								if (buffer_index >= buffer_size) // sécurité pour le buffer
+									return -2;
+
+								int to_print = ux/power_int(base, power_base);
+								
+								if (to_print <= 9) {
+									buffer[buffer_index++] = 48 + (to_print);
+								} else {
+									buffer[buffer_index++] = 55 + (to_print);
+								}
+								ux-= (ux/power_int(base, power_base)) * power_int(base, power_base);
+								power_base-=1;
+							}
+							break;
+					}
+					
+					format_index+=1;
+
+				} else {
+					return -5;
+				}
+
+				break;
+				
 				case 'c':
+					buffer[buffer_index++] = *(char*)(args[arg_index]);
 					break;
+				
+
+				default:
+					return -3;
 			}
+
+			arg_index+=1;
+			format_index+=2;
+		} else {
+			buffer[buffer_index++] = format[format_index++];
 		}
 	}
 
-	return false;
-}*/
+	if (buffer_index < buffer_size) {
+		buffer[buffer_index] = '\0';
+	} else {
+		return -4;
+	}
+
+	return 1;
+}

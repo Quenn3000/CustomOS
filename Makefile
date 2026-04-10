@@ -2,7 +2,7 @@ SRC_PATH = src/
 RES_PATH = res/
 HEADER_PATH = include/
 CFLAGS = -I $(HEADER_PATH) -ffreestanding -mgeneral-regs-only -m32 -g -fno-pie -fno-use-cxa-atexit -nostdlib -fno-builtin -fno-rtti -fno-exceptions -fno-leading-underscore -fpermissive -fno-stack-protector
-objects = kernel_entry.o kernel.o math.o ioport.o utils.o interrupt_descriptor_table.o strings.o interrupt_handlers.o PCIController.o keyboard.o heap.o memory_management.o
+objects = kernel_entry.o kernel.o math.o ioport.o utils.o interrupt_descriptor_table.o strings.o interrupt_handlers.o PCIController.o keyboard.o memory_management.o
 objects_target = $(addprefix $(RES_PATH),$(objects))
 
 all: $(RES_PATH)bin/OS.bin

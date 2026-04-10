@@ -2,6 +2,7 @@
 #include <types.hpp>
 #include <math.hpp>
 #include <ioport.hpp>
+#include <strings.hpp>
 
 uint16_t* cursor;
 
@@ -77,7 +78,7 @@ void print_char(char c) {
 
 
 // print a string on the current cursor position
-void print_string(char const* str) {
+void print_string(const char* str) {
     uint16_t screen_width = get_screen_width()*2;
     int screen_size = screen_width*get_screen_height();
     for (int i=0; str[i] != '\0' && (int) cursor < TEXT_SCREEN_START_ADDRESS+screen_size; i++) {
@@ -133,16 +134,21 @@ bool print_int(int x, int base) {
     return true;
 }
 
-
 // --- DEBUG ---
 
-void debug_string(char const* str) {
+void debug_string(const char* str) {
     Port8Bit debug_out(OUTPUT_SERIAL_PORT); // port serial de sortie pour qemu
 
     for (int i=0; str[i] != '\0'; i++) {
         debug_out.write(str[i]);
     }
 
+}
+
+void debug_char(const char c) {
+    Port8Bit debug_out(OUTPUT_SERIAL_PORT); // port serial de sortie pour qemu
+
+    debug_out.write(c);
 }
 
 

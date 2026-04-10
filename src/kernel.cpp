@@ -4,10 +4,8 @@
 #include <utils.hpp>
 #include <strings.hpp>
 #include <keyboard.hpp>
-#include <heap.hpp>
 #include <PCIController.hpp>
 #include <memory_management.hpp>
-
 
 
 extern "C" void main() {
@@ -24,14 +22,29 @@ extern "C" void main() {
 
     KeyboardDriver keyboardDriver = KeyboardDriver(&itrManager);
     
-    init_heap();
+    MemoryManager* memory_manager = MemoryManager::Instance();
 
     print_clearall();
     print_string((char*)&title);
 
+    //uint16_t* caca = "Hello World!";
+
     PeriphericalComponnentInterconnectController PCIController;
 
+    MemoryMapEntry* test_block = memory_manager->get_block(0);
+
+
     PCIController.print_devices();
+
+    unsigned int x = 12;
+    char buffer_test[1000];
+    char c = 'x';
+    if (out_format_factor("test de x = %ud, c = %c\n", (char*)&buffer_test, 1000, 2, &x, &c)) {
+        print_string("Test reussi\n");
+    } else {
+        print_string("Test rate\n");
+    }
+    print_string(buffer_test);
 
 
     char buffer[128];

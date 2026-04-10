@@ -6,7 +6,7 @@
 // https://pdos.csail.mit.edu/6.828/2005/readings/i386/s09_05.htm
 
 
-bool InterruptManager::setInterrupt(int n, uint32_t handler) {
+bool InterruptManager::set_interrupt(int n, uint32_t handler) {
     bool res = !( this->idt[n].offset_low || this->idt[n].offset_high ); // check si un handler avait déjà été renseigné pour la fonction
 
     this->idt[n].offset_low = handler & 0xFFFF;
@@ -18,7 +18,7 @@ bool InterruptManager::setInterrupt(int n, uint32_t handler) {
     return res;
 }
 
-void InterruptManager::resetInterrupt(int n) {
+void InterruptManager::reset_interrupt(int n) {
     this->idt[n].offset_low = 0;
     this->idt[n].selector = 0; // Kernel code segment
     this->idt[n].zero = 0;
@@ -43,7 +43,7 @@ void InterruptManager::idt_install() {
 void InterruptManager::init() {
     asm volatile ("cli");
 
-    this->setInterrupt(0x20, (uint32_t)default_handler);
+    this->set_interrupt(0x20, (uint32_t)default_handler);
 
     this->idt_install();
 
@@ -86,5 +86,5 @@ void InterruptManager::init_pic() {
 
 
 InterruptManager::InterruptManager() {
-    for (int i=0; i<this->interrupt_nb; this->resetInterrupt(i++)); // reset all interruptions catchings
+    for (int i=0; i<this->interrupt_nb; this->reset_interrupt(i++)); // reset all interruptions catchings
 }

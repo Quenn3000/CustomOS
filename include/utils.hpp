@@ -17,4 +17,5 @@ bool print_int(int x, int base=10);
 
 // --- DEBUGGING ---
 void debug_string(char const* str);
+void debug_char(char const str);
 bool debug_int(int x, int base=10);

@@ -39,8 +39,8 @@ class InterruptManager {
 
         void init();
 
-        bool setInterrupt(int n, uint32_t function);
-        void resetInterrupt(int interrupt);
+        bool set_interrupt(int n, uint32_t function);
+        void reset_interrupt(int interrupt);
 
     
     private:
