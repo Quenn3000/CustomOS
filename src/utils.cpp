@@ -134,6 +134,31 @@ bool print_int(int x, int base) {
     return true;
 }
 
+
+// retourne la valeur de out_format_factor; si la taille de format est grosse par rapport à la capa du buffer : return 2
+int printf(char* format, const int nb_arg=0, void* arg=NULL, ...) {
+    void** args = (void**)(&arg);
+
+    debug_string("\nARG VALUE (printf) : ");
+    debug_int(args);
+    debug_char('\n');
+	debug_string("TEST ARGUMENTS (printf) : ");
+    debug_char(*(char*)(args[0]));
+    debug_char('\n');
+
+
+    char buffer[2048];
+    int res = out_format_factor(format, buffer, 2048, nb_arg, args);
+    if (res == 1) {
+        print_string(buffer);
+        if (strlen(format) >= 1536) {
+            res = 2;
+        }
+    }
+
+    return res;
+}
+
 // --- DEBUG ---
 
 void debug_string(const char* str) {

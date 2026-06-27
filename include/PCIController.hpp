@@ -43,7 +43,7 @@ class PeriphericalComponnentInterconnectedDeviceDescriptor {
 class PeriphericalComponnentInterconnectController {
 	public:
 		PeriphericalComponnentInterconnectController();
-		void print_devices();
+		void debug_devices();
 
 	private:
 		uint32_t read(uint8_t bus, uint16_t device, uint8_t function, uint32_t registerOffset);

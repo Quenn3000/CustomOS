@@ -179,7 +179,6 @@ bool in_format_factor(char* format, char* text, int nb_args, void * arg, ...) { 
 
 	while (format_index < format_length) {
 		if (format[format_index] == text[text_index]) {
-			//print_char(text[text_index]);
 			format_index+=1;
 			text_index+=1;
 		} else if (format[format_index] == '%' && format_index<format_length-1) { // manage %*
@@ -242,14 +241,21 @@ bool in_format_factor(char* format, char* text, int nb_args, void * arg, ...) { 
 -2	: buffer filled when treating a number
 -3	: not a good format after '%'
 -4	: buffer filled without '\0' at the end
+
+On parcours le format, et au fur et à mesure que l'on rencontre du text classique ou des formats on rajoute dans le buffer
 */
-int out_format_factor(const char* format, char* buffer, int buffer_size, int nb_args, void * arg, ...) {
+int out_format_factor(const char* format, char* buffer, int buffer_size, int nb_args, void** args) {
 	int buffer_index = 0;
 	int format_index = 0;
 	int arg_index = 0;
 	int format_length = strlen(format);
 
-	void** args = (void**)(&arg);
+	debug_string("ARG VALUE (out_format) : ");
+    debug_int(args);
+    debug_char('\n');
+	debug_string("TEST ARGUMENTS (out_format) : ");
+    debug_char(*(char*)(args[1]));
+    debug_char('\n');
 
 
 	while (format_index <= format_length && buffer_index < buffer_size) {
@@ -279,48 +285,51 @@ int out_format_factor(const char* format, char* buffer, int buffer_size, int nb_
 
 					nb_digit = itoa(x, buffer_size-buffer_index, &buffer[buffer_index], base);
 					if (!nb_digit) {
-						print_string("itoa not good\n");
 						return -2;
 					}
+
 					buffer_index+= nb_digit;
+
+					break;
 				
 
 				// unsigned int
 				case 'u':
-				if (format_index+2 < format_length) {
-					switch (format[format_index+2]) {
-						case 'd':
-							base = 10;
+					if (format_index+2 < format_length) {
+						switch (format[format_index+2]) {
+							case 'd':
+								base = 10;
 
-						case 'x':
-							if (base == 0)
-								base = 16;
-						case 'b':
-							if (base == 0)
-								base = 2;
+							case 'x':
+								if (base == 0)
+									base = 16;
+							case 'b':
+								if (base == 0)
+									base = 2;
 
-							ux = *(unsigned int*)(args[arg_index]);
+								ux = *(unsigned int*)(args[arg_index]);
 
-							nb_digit = uitoa(ux, buffer_size-buffer_index, &buffer[buffer_index], base);
-							if (!nb_digit) {
-								print_string("itoa not good\n");
-								return -2;
-							}
-							buffer_index+= nb_digit;
-						
+								nb_digit = uitoa(ux, buffer_size-buffer_index, &buffer[buffer_index], base);
+								if (!nb_digit) {
+									return -2;
+								}
+								buffer_index+= nb_digit;
 							
+								
+						}
+						
+						format_index+=1;
+
+					} else {
+						return -5;
 					}
-					
-					format_index+=1;
 
-				} else {
-					return -5;
-				}
-
-				break;
+					break;
 				
 				case 'c':
 					buffer[buffer_index++] = *(char*)(args[arg_index]);
+					debug_string("Arg index : ");
+					debug_int(arg_index);
 					break;
 				
 

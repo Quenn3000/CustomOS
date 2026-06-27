@@ -2,3 +2,4 @@ address of the kernel location harcoded in bootloader.asm at "KERNEL_LOCATION eq
 address of the 32 bits stack harcoded in bootloader.asm before this comment : 32 bit stack base pointer
 MEMORY_MAP_ENTRIES_ADDRESS harcoded in memory_management.hpp and in bootloader.asm
 MEMORY_MAP_ENTRIES_COUNTER_ADDRESS harcoded in memory_management.hpp and in bootloader.asm
+address for screen dimensions hardcoded at 0x044A in bootloader.asm and ....c

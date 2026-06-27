@@ -7,6 +7,7 @@
 #include <PCIController.hpp>
 #include <memory_management.hpp>
 
+#ifndef TEST
 
 extern "C" void main() {
     debug_string("Lancement du kernel\n\n");
@@ -32,7 +33,10 @@ extern "C" void main() {
     MemoryMapEntry* test_block = memory_manager->get_block(0);
 
 
-    PCIController.print_devices();
+    PCIController.debug_devices();
+
+    //int x=0;
+    //printf("Block : {%d}\n", 1, &x);
 
 
     char buffer[128];
@@ -40,7 +44,7 @@ extern "C" void main() {
         print_string(">> ");
         keyboardDriver.scan_keyboard(buffer, 128, true);
         
-        if (strcmp(buffer, "exit")) {
+        if (strcmp(buffer, "exit") == 0) {
             print_clearall();
             return;
         }
@@ -49,3 +53,23 @@ extern "C" void main() {
         print_string("\n");
     }
 }
+
+#else
+
+#include <tests.hpp>
+extern "C" void main() {
+    debug_string("DEBUG MOD");
+    set_cursor();
+
+    print_string("DEBUG MOD");
+
+    InterruptManager itrManager = InterruptManager();
+    itrManager.init();
+
+
+    tests();
+
+    while(1);
+}
+
+#endif

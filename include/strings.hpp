@@ -10,4 +10,4 @@ int strcmp(const char s1[], const char s2[]);
 
 
 bool in_format_factor(char* format, char* text, int nb_args, void * arg, ...);
-int out_format_factor(const char* format, char* buffer, int buffer_size, int nb_args, void * arg, ...);
+int out_format_factor(const char* format, char* buffer, int buffer_size, int nb_args, void** args);

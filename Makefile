@@ -1,11 +1,31 @@
 SRC_PATH = src/
 RES_PATH = res/
+TESTS_PATH = $(RES_PATH)tests/
 HEADER_PATH = include/
 CFLAGS = -I $(HEADER_PATH) -ffreestanding -mgeneral-regs-only -m32 -g -fno-pie -fno-use-cxa-atexit -nostdlib -fno-builtin -fno-rtti -fno-exceptions -fno-leading-underscore -fpermissive -fno-stack-protector -fno-threadsafe-statics
 # -fno-threadsafe-statics : désactive la protection contre les accès concurrents lors de l'initialisation des variables statiques locales
 # de toute façon il peut pas appeler les fonctions qui le permettent vu qu'elles n'existent pas chez moi HAHAHA
-objects = kernel_entry.o kernel.o math.o ioport.o utils.o interrupt_descriptor_table.o strings.o interrupt_handlers.o PCIController.o keyboard.o memory_management.o
+objects =	kernel_entry.o \
+			kernel.o \
+			math.o \
+			ioport.o \
+			utils.o \
+			interrupt_descriptor_table.o \
+			strings.o \
+			interrupt_handlers.o \
+			PCIController.o \
+			keyboard.o \
+			memory_management.o
+
+objects_test =	tests.o \
+				in_format.o \
+				printf.o
+
+# := $(shell ls src/tests -1 | sed -e 's/\..*$//')
+
 objects_target = $(addprefix $(RES_PATH),$(objects))
+
+objects_test_target = $(addprefix $(TESTS_PATH),$(objects_test))
 
 all: $(RES_PATH)bin/OS.bin
 
@@ -27,6 +47,8 @@ $(RES_PATH)zeros.bin: $(SRC_PATH)zeros.asm
 
 
 $(RES_PATH)full_kernel.bin: $(objects_target)
+	echo $(objects_test)
+	echo $(objects_target)
 	ld -m elf_i386 -s -Ttext 0x1000 --oformat binary $(objects_target) -o "$(RES_PATH)full_kernel.bin"
 
 
@@ -40,10 +62,10 @@ $(RES_PATH)bin/OS.bin: $(RES_PATH)full_os.bin $(RES_PATH)zeros.bin
 clean:
 	find res/. -type f -exec rm {} \;
 
-tests:
-	$(objects += $(objects) test/*.o)
-	$(MAKE) all
 
+tests:
+	@mkdir -p $(TESTS_PATH)
+	$(MAKE) all CFLAGS="$(CFLAGS) -D TEST" objects_target="$(objects_target) $(objects_test_target)"
 
 run:
 	qemu-system-x86_64 -drive format=raw,file="res/bin/OS.bin",index=0,if=floppy, -m 128M -serial stdio

@@ -61,7 +61,7 @@ PeriphericalComponnentInterconnectedDeviceDescriptor PeriphericalComponnentInter
 
 
 
-void PeriphericalComponnentInterconnectController::print_devices() {
+void PeriphericalComponnentInterconnectController::debug_devices() {
 	for (int bus=0; bus<8; bus++) {
 		for (int device=0; device<32; device++) {
 			int function_nb = this->device_has_function(bus, device) ? 8 : 1;

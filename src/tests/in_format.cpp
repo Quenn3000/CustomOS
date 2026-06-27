@@ -1,7 +1,10 @@
-#include "../utils.hpp"
-#include "../strings.hpp"
+#include <utils.hpp>
+#include <strings.hpp>
 
-void test {
+#include <utils.hpp>
+#include <strings.hpp>
+
+void test_in_format_factor() {
 	int t = 1;
     int a = 2;
     char b = 'p';
@@ -20,5 +23,5 @@ void test {
     print_int(a);
     print_string("\n");
     print_char(b);
-    print_string("\nend factorised\n");
+    print_string("\nend factorised\n\n");
 }
