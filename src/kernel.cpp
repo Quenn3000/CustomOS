@@ -30,13 +30,28 @@ extern "C" void main() {
 
     PeriphericalComponnentInterconnectController PCIController;
 
-    MemoryMapEntry* test_block = memory_manager->get_block(0);
-
-
     PCIController.debug_devices();
 
-    //int x=0;
-    //printf("Block : {%d}\n", 1, &x);
+
+    // memory manager
+    MemoryMapEntry* test_block = memory_manager->get_block(0);
+
+    printf("Block (address 0x%x): {%ud, %ud, %ud, %ud}\n", 5,
+        (int)&test_block,
+        &test_block->base_address,
+        &test_block->length,
+        &test_block->type,
+        &test_block->attributes);
+    test_block = memory_manager->get_block(1);
+
+    printf("Block (address 0x%x): {%ud, %ud, %ud, %ud}\n", 5,
+        (int)&test_block,
+        &test_block->base_address,
+        &test_block->length,
+        &test_block->type,
+        &test_block->attributes);
+    int nb_block = memory_manager->get_block_number();
+    printf("Block number : %d\n", 1, &nb_block);
 
 
     char buffer[128];

@@ -250,13 +250,6 @@ int out_format_factor(const char* format, char* buffer, int buffer_size, int nb_
 	int arg_index = 0;
 	int format_length = strlen(format);
 
-	debug_string("ARG VALUE (out_format) : ");
-    debug_int(args);
-    debug_char('\n');
-	debug_string("TEST ARGUMENTS (out_format) : ");
-    debug_char(*(char*)(args[1]));
-    debug_char('\n');
-
 
 	while (format_index <= format_length && buffer_index < buffer_size) {
 		if (format[format_index] == '%' && format_index+1 < format_length) {

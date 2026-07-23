@@ -73,3 +73,6 @@ run:
 
 debug:
 	qemu-system-x86_64 -drive format=raw,file="res/bin/OS.bin",index=0,if=floppy, -m 128M -s -S -serial stdio
+
+run_nographic:
+	qemu-system-x86_64 -drive format=raw,file="res/bin/OS.bin",index=0,if=floppy, -m 128M -serial stdio -display curses

@@ -44,8 +44,6 @@ void InterruptManager::idt_install() {
 void InterruptManager::init() {
     asm volatile ("cli");
 
-    this->set_interrupt(0x20, (uint32_t)default_handler);
-
     this->idt_install();
 
     this->init_pic();

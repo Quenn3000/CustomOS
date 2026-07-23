@@ -139,13 +139,6 @@ bool print_int(int x, int base) {
 int printf(char* format, const int nb_arg=0, void* arg=NULL, ...) {
     void** args = (void**)(&arg);
 
-    debug_string("\nARG VALUE (printf) : ");
-    debug_int(args);
-    debug_char('\n');
-	debug_string("TEST ARGUMENTS (printf) : ");
-    debug_char(*(char*)(args[0]));
-    debug_char('\n');
-
 
     char buffer[2048];
     int res = out_format_factor(format, buffer, 2048, nb_arg, args);

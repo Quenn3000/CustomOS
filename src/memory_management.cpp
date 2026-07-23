@@ -18,9 +18,15 @@ MemoryManager* MemoryManager::Instance() {
 
 MemoryManager::MemoryManager() : memory_map_counter(*(uint16_t*)MEMORY_MAP_ENTRIES_COUNTER_ADDRESS), memory_map((MemoryMapEntry*)MEMORY_MAP_ENTRIES_ADDRESS) {}
 
+
 MemoryMapEntry* MemoryManager::get_block(int i) {
 	if (0 <= i && i < this->memory_map_counter) {
 		return &this->memory_map[i];
 	}
 	return NULL;
+}
+
+int16_t MemoryManager::get_block_number() {
+	int16_t* counter_address = (int16_t*)MEMORY_MAP_ENTRIES_COUNTER_ADDRESS;
+	return *(int16_t*)(counter_address);
 }

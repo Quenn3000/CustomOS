@@ -66,19 +66,23 @@ mov [0x044A], ah  ; Store screen width (AH contains width)
 
 ; --- here is the part who get memory mapping ---
 mov ebx, 0
+xor ax, ax
+mov es, ax
 
-mov eax, 0xE820 ; function number to use. Here is the doc : http://www.uruk.org/orig-grub/mem64mb.html
-mov ecx, 24 ; size of one MemoryMapEntry
 mov di, 0x9000 ; address to store all MemoryMapEntries
-mov edx, 0x534D4150 ; magic number
-mov [memory_map_count], 0 ; set memory_map_count to 0
+mov word [memory_map_count], 0 ; set memory_map_count to 0
 
 .get_memory_map:
+    ; reinit values
+    mov eax, 0xE820
+    mov ecx, 24
+    mov edx, 0x534D4150
+
     int 15h ; BIOS call
     jc .memory_mapped ; test if it crashed or it got an error
     cmp eax, 0x534D4150 ; test if the magic number is set into eax; it mean all worked
     jne .failure
-    add es:di, 24; add 24 to the address to store the next MemoryMapEntry
+    add di, 24; add 24 to the address to store the next MemoryMapEntry
     inc word [memory_map_count] ; increment memory_map_count
     cmp ebx, 0
     jne .get_memory_map
@@ -87,6 +91,7 @@ mov [memory_map_count], 0 ; set memory_map_count to 0
 .memory_mapped:
     cmp word [memory_map_count], 0
     je .failure ; BIOS does not support E820 function
+
 
 ; --- description of the GlobalDescriptoTable and loading
 CODE_SEG equ GDT_code - GDT_start
@@ -134,7 +139,7 @@ GDT_descriptor:
 
 
 msg_failure: db "Loading failed, error : ", 0
-memory_map_count : dw 0x8FFE ; address of memory_map_counter (declared in memory_management.hpp)
+memory_map_count equ 0x8FFE ; address of memory_map_counter (declared in memory_management.hpp)
 
 
 ; --- * print_string function ---
