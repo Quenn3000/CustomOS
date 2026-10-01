@@ -10,7 +10,7 @@ uint16_t* cursor;
 // set the global variable cursor
 bool set_cursor(int n, bool relative) {
     if (relative) {
-        if ((int)cursor + n >= TEXT_SCREEN_START_ADDRESS && (int)cursor + n <= TEXT_SCREEN_START_ADDRESS+get_screen_width()*get_screen_height()) {
+        if ((int)cursor + n >= TEXT_SCREEN_START_ADDRESS && (int)cursor + n <= TEXT_SCREEN_START_ADDRESS+(get_screen_width()*get_screen_height())*2) { // *2 car chaques caractère prend 2 octects
             cursor+=n;
             return true;
         }
@@ -45,8 +45,8 @@ void print_clearall() {
 // set the char c, n cases after the current position (if in relative mod) or at the n-th case (if not in relative mod)
 bool set_char(int n, char c, bool relative) {
     if (relative) {
-
-        if ((int)cursor + n >= TEXT_SCREEN_START_ADDRESS && (int)cursor + n <= TEXT_SCREEN_START_ADDRESS+get_screen_width()*get_screen_height()) {
+        
+        if ((int)cursor + n >= TEXT_SCREEN_START_ADDRESS && (int)cursor + n <= TEXT_SCREEN_START_ADDRESS+(get_screen_width()*get_screen_height())*2) {
             *(cursor+n) = 0x0f00 | c;
             return true;
         }
@@ -95,7 +95,7 @@ void print_string(const char* str) {
 
 
 // print an int on the current cursor position
-bool print_int(int x, int base) {
+bool print_int(int64_t x, int base) {
     if (base < 2 || base > 32) {
         return false;
     }
@@ -106,8 +106,8 @@ bool print_int(int x, int base) {
         x = -x;
     }
 
-    int sav_x = x;
-    int power_base = 0;
+    int64_t sav_x = x;
+    int16_t power_base = 0;
 
     while (x >= base) {
         x = x / base;

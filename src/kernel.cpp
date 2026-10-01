@@ -17,16 +17,23 @@ extern "C" void main() {
 
 
     print_string("Loading IDT Kernel\n");
-    
+
     InterruptManager itrManager = InterruptManager();
     itrManager.init();
 
     KeyboardDriver& keyboardDriver = KeyboardDriver::Instance(&itrManager);
     
     MemoryManager* memory_manager = MemoryManager::Instance();
-
+    
     print_clearall();
     print_string((char*)&title);
+    uint64_t x = 0;
+    uint64_t y = 0;
+
+    print_int(&x);
+    print_string("\n");
+    print_int(&y);
+    print_string("\n");
 
     PeriphericalComponnentInterconnectController PCIController;
 
@@ -34,24 +41,20 @@ extern "C" void main() {
 
 
     // memory manager
-    MemoryMapEntry* test_block = memory_manager->get_block(0);
-
-    printf("Block (address 0x%x): {%ud, %ud, %ud, %ud}\n", 5,
-        (int)&test_block,
-        &test_block->base_address,
-        &test_block->length,
-        &test_block->type,
-        &test_block->attributes);
-    test_block = memory_manager->get_block(1);
-
-    printf("Block (address 0x%x): {%ud, %ud, %ud, %ud}\n", 5,
-        (int)&test_block,
-        &test_block->base_address,
-        &test_block->length,
-        &test_block->type,
-        &test_block->attributes);
+    MemoryMapEntry* test_block;
     int nb_block = memory_manager->get_block_number();
     printf("Block number : %d\n", 1, &nb_block);
+
+    for (int i=0; i<nb_block; i++) {
+        test_block = memory_manager->get_block(i);
+        printf("Block (address 0x%x): {%ud, %ud, %ud, %ud}\n", 5,
+        (int)&test_block,
+        &test_block->base_address,
+        &test_block->length,
+        &test_block->type,
+        &test_block->attributes);
+    }
+
 
 
     char buffer[128];

@@ -64,6 +64,17 @@ int 0x10        ; Call BIOS
 mov [0x044A], ah  ; Store screen width (AH contains width)
 
 
+; --- get CPU frequency --- (not used for now)
+;rdtsc   ; store timestamp counter into EDX:EAX
+;mov ebx, eax ; save eax, we only need low-valuated bytes
+
+;int 0x1C ; wait 50ms
+
+;rdtsc
+;sub eax, ebx ; number of cycle elapsed during 50ms in eax
+;mov dword [cycle_nb], eax
+
+
 ; --- here is the part who get memory mapping ---
 mov ebx, 0
 xor ax, ax
@@ -140,6 +151,7 @@ GDT_descriptor:
 
 msg_failure: db "Loading failed, error : ", 0
 memory_map_count equ 0x8FFE ; address of memory_map_counter (declared in memory_management.hpp)
+;cycle_nb equ 0x903E ; 0x8FFE + 64bits (not used for now) (oupsii, c'est déjà là qu'il y a le mapping de la mémoire ^^')
 
 
 ; --- * print_string function ---

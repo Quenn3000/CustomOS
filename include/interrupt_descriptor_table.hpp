@@ -12,6 +12,7 @@
 #define PIC_MASTER_DATA_PORT 0x21
 #define PIC_SLAVE_DATA_PORT 0xA1
 
+// struct imposed by the processor
 struct IDTEntry {
     uint16_t offset_low;   // Lower 16 bits of ISR address
     uint16_t selector;     // Code segment selector (usually 0x08)
@@ -20,9 +21,10 @@ struct IDTEntry {
     uint16_t offset_high;  // Upper 16 bits of ISR address
 } __attribute__((packed));
 
+// struct imposed by the processor
 struct IDTPointer {
-    uint16_t limit;
-    uint32_t base;
+    uint16_t limit; // size of the IDT
+    uint32_t base; // address of the IDT
 } __attribute__((packed));
 
 
@@ -33,6 +35,10 @@ typedef struct IDTPointer IDTPointer;
 // assembly function coded into kernel_entry.asm, loading the Interrupt Descriptor Table into the IDTRegister
 extern "C" void load_idt(void* idt_ptr);
 
+
+/*
+Goal : Manage all interruptions
+*/
 class InterruptManager {
     public:
         InterruptManager();

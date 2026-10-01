@@ -13,7 +13,7 @@ void print_clearall(); // clear the textual screen
 bool set_char(int n, char c, bool relative=false);
 void print_char(char c);
 void print_string(char const* str);
-bool print_int(int x, int base=10);
+bool print_int(int64_t x, int base=10);
 int printf(char* format, int nb_arg=0, void* arg=NULL, ...);
 
 // --- DEBUGGING ---
