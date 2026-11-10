@@ -20,9 +20,9 @@ bool InterruptManager::set_interrupt(int n, uint32_t handler) {
 }
 
 bool InterruptManager::reset_interrupt(int n) {
-    if (n >= this->nb_interrupt) {
+    if (n >= this->nb_interrupt)
         return false;
-    }
+    
     this->idt[n].offset_low = 0;
     this->idt[n].selector = 0; // Kernel code segment
     this->idt[n].zero = 0;
@@ -33,7 +33,7 @@ bool InterruptManager::reset_interrupt(int n) {
 }
 
 // set all parameters to call correctly load_idt
-void InterruptManager::idt_install() {
+inline void InterruptManager::idt_install() {
     this->idt_ptr.limit = (sizeof(IDTEntry) * IDT_SIZE) - 1;
     this->idt_ptr.base = (uint32_t)&idt;
 
@@ -46,13 +46,15 @@ void InterruptManager::init() {
 
     this->idt_install();
 
+    this->set_interrupt(0x20, (uint32_t)default_handler); // set a default handler for IRQ0 (PIT) interruption (sinon le timer se réveille... ET C'EST TERRIBLE !! (interruption non intercepté))
+
     this->init_pic();
 
     asm volatile ("sti");
 }
 
 // PIC remapping and masking
-void InterruptManager::init_pic() {
+inline void InterruptManager::init_pic() {
     Port8Bit master_command_port(PIC_MASTER_COMMAND_PORT);
     Port8Bit slave_command_port(PIC_SLAVE_COMMAND_PORT);
 
@@ -72,7 +74,7 @@ void InterruptManager::init_pic() {
     master_data_port.write(0x1); // 8086 environment
     slave_data_port.write(0x1);
 
-    master_data_port.write(0xFD); // mask all interrupts except IRQ1 and IRQ0 : mask 11111100
+    master_data_port.write(0xFC); // mask all interrupts except IRQ1 and IRQ0 : mask 11111100
     slave_data_port.write(0xFF); // mask all interrupts
 }
 

@@ -1,4 +1,3 @@
-#include <cstddef>
 #include <memory_management.hpp>
 #include <types.hpp>
 #include <utils.hpp>
@@ -7,13 +6,13 @@ MemoryManager* MemoryManager::_instance_address = NULL;
 MemoryManager MemoryManager::_instance;
 
 
-MemoryManager* MemoryManager::Instance() {
+MemoryManager& MemoryManager::Instance() {
 	if (MemoryManager::_instance_address == NULL) {
 		MemoryManager::_instance = MemoryManager();
 		MemoryManager::_instance_address = &MemoryManager::_instance;
 	}
 
-	return MemoryManager::_instance_address;
+	return (MemoryManager&) MemoryManager::_instance;
 }
 
 
@@ -35,7 +34,7 @@ MemoryManager::MemoryManager() : memory_map_counter(*(uint16_t*)MEMORY_MAP_ENTRI
 		}
 	}
 
-	bitmap = correct_block->base_address; // set address for bitmap
+	bitmap = (uint8_t*) correct_block->base_address; // set address for bitmap
 
 
 	// I assume here correct_block contains the correct block (lol) of memory
@@ -43,9 +42,6 @@ MemoryManager::MemoryManager() : memory_map_counter(*(uint16_t*)MEMORY_MAP_ENTRI
 	// --- SET BITMAP ---
 	bitmap_size = (uint64_t)((correct_block->length) / (uint64_t) ((MEMORY_PROCESS_BLOCK_SIZE+1) * 8)); // *8 bcs bitmat is an int8_t, so 8 blocks per int
 	
-	print_string("Bitmap size : ");
-	print_int(&bitmap);
-	print_string("\n\n");
 	for (int i=0; i<bitmap_size; bitmap[i++] = 0x00); // initialize all to 0 (not used)
 
 	memory_block_adress = bitmap + bitmap_size*sizeof(uint8_t);
@@ -84,7 +80,7 @@ void* MemoryManager::malloc() { // return 4Ko free address
 
 	bitmap[index] |= 1<<offset; // reserve block in the bitmap
 
-	return (void*) this->memory_block_adress + (index*8 + offset) *MEMORY_PROCESS_BLOCK_SIZE;
+	return (void*)( ((uint64_t)this->memory_block_adress) + (index*8 + offset) *MEMORY_PROCESS_BLOCK_SIZE );
 }
 
 

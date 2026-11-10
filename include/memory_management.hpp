@@ -1,10 +1,12 @@
 #pragma once
 
 #include <types.hpp>
+#include <process.hpp>
+
 #define MEMORY_MAP_ENTRIES_COUNTER_ADDRESS 0x8FFE
 #define MEMORY_MAP_ENTRIES_ADDRESS 0x9000 // you can find it in bootloader.asm // I should create a way to centralize this value
 
-#define MEMORY_PROCESS_BLOCK_SIZE 4096 // 4Ko
+#define MEMORY_PROCESS_BLOCK_SIZE sizeof(ProcessNode)
 
 /*
 Address Range Descriptor Structure (from the doc)
@@ -50,7 +52,7 @@ class MemoryManager {
 	public:
 		uint16_t memory_map_counter;
 		
-		static MemoryManager* Instance();
+		static MemoryManager& Instance();
 
 		// --- getters ---
 		MemoryMapEntry* get_block(int i);
@@ -59,7 +61,6 @@ class MemoryManager {
 		// --- pratical functions ---
 		void* malloc();
 		bool free(void* addr);
-		bool isFree(void* addr);
 	
 	protected:
 		MemoryManager();
@@ -72,5 +73,5 @@ class MemoryManager {
 		
 		uint8_t* bitmap;
 		void* memory_block_adress; // address of the real entrypoint for the block address
-		uint64_t bitmap_size;
+		uint64_t bitmap_size; // size in bits, not bytes
 };

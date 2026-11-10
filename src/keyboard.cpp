@@ -5,7 +5,18 @@
 #include <utils.hpp>
 #include <ioport.hpp>
 
-KeyboardDriver* KeyboardDriver::_instance_address = nullptr;
+KeyboardDriver* KeyboardDriver::_instance_address = NULL;
+
+
+KeyboardDriver& KeyboardDriver::Instance(InterruptManager* itrManager) {
+	if (_instance_address != NULL) {
+		return (KeyboardDriver&) *_instance_address;
+	}
+	static KeyboardDriver _instance(itrManager);
+	KeyboardDriver::_instance_address = &_instance;
+
+	return _instance;
+}
 
 
 // init all the keyboard related variables
@@ -13,7 +24,7 @@ KeyboardDriver::KeyboardDriver(InterruptManager* itrManager) {
 
 	this->_instance_address = this;
 
-	itrManager->set_interrupt(0x21, (uint32_t)KeyboardDriver::interrupt_handler);
+	itrManager->set_interrupt(0x21, (uint32_t)KeyboardDriver::interrupt_key_handler);
 
 	for (int i=0; i<256; i++) {
 		this->KEY_PRESSED[i] = false;

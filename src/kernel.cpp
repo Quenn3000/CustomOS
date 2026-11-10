@@ -10,6 +10,7 @@
 #ifndef TEST
 
 extern "C" void main() {
+
     debug_string("Lancement du kernel\n\n");
     set_cursor();
 
@@ -23,7 +24,7 @@ extern "C" void main() {
 
     KeyboardDriver& keyboardDriver = KeyboardDriver::Instance(&itrManager);
     
-    MemoryManager* memory_manager = MemoryManager::Instance();
+    MemoryManager& memory_manager = MemoryManager::Instance();
     
     print_clearall();
     print_string((char*)&title);
@@ -42,11 +43,11 @@ extern "C" void main() {
 
     // memory manager
     MemoryMapEntry* test_block;
-    int nb_block = memory_manager->get_block_number();
+    int nb_block = memory_manager.get_block_number();
     printf("Block number : %d\n", 1, &nb_block);
 
     for (int i=0; i<nb_block; i++) {
-        test_block = memory_manager->get_block(i);
+        test_block = memory_manager.get_block(i);
         printf("Block (address 0x%x): {%ud, %ud, %ud, %ud}\n", 5,
         (int)&test_block,
         &test_block->base_address,
@@ -85,7 +86,7 @@ extern "C" void main() {
     itrManager.init();
 
 
-    tests();
+    tests(&itrManager);
 
     while(1);
 }

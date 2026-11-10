@@ -33,8 +33,8 @@ objects =	kernel_entry.o \
 			PCIController.o \
 			keyboard.o \
 			memory_management.o \
-			process.o \
 			switch_context.o \
+			process.o \
 			stdlib.o \
 			time.o
 

@@ -47,7 +47,6 @@ class InterruptManager {
 
         bool set_interrupt(int n, uint32_t function);
         bool reset_interrupt(int interrupt);
-
     
     private:
         int nb_interrupt = IDT_SIZE; // 0x00 <--> 0x15 : processor interruption; 0x20 <--> 0xff : external interruption

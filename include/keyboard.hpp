@@ -33,12 +33,7 @@ class KeyboardDriver {
 			0,  ' '
 		};
 
-		static KeyboardDriver& Instance(InterruptManager* itrManager) {
-			static KeyboardDriver _instance(itrManager);
-			KeyboardDriver::_instance_address = &_instance;
-		
-			return _instance;
-		}
+		static KeyboardDriver& Instance(InterruptManager* itrManager);
 
 
 		char getch();
@@ -55,7 +50,7 @@ class KeyboardDriver {
 		bool KEY_PRESSED[256];
 		char KEYBOARD_BUFFER;
 
-		static __attribute__((interrupt)) void interrupt_handler(IDTEntry* entry) {
+		static __attribute__((interrupt)) void interrupt_key_handler(IDTEntry* entry) {
 			if (_instance_address == nullptr)
 				return;
 
@@ -75,7 +70,7 @@ class KeyboardDriver {
 		    } else {
 		        _instance_address->KEY_PRESSED[ascii] = false;
 			}
-		    master_port.write(0x20);
+		    master_port.write(0x20); // end of interrupt
 
 		    return;
 		}

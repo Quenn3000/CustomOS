@@ -321,8 +321,6 @@ int out_format_factor(const char* format, char* buffer, int buffer_size, int nb_
 				
 				case 'c':
 					buffer[buffer_index++] = *(char*)(args[arg_index]);
-					debug_string("Arg index : ");
-					debug_int(arg_index);
 					break;
 				
 

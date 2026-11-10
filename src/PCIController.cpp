@@ -13,8 +13,8 @@ void write(uint8_t bus, uint16_t device, uint8_t function, uint32_t registerOffs
 uint32_t PeriphericalComponnentInterconnectController::get_id(uint8_t bus, uint16_t device, uint8_t function, uint32_t registerOffset) {
 	
 	uint32_t id = 0x1 << 31
-		| ((bus && 0xFF) << 16)
-		| ((device && 0x1F) << 11)
+		| ((bus & 0xFF) << 16)
+		| ((device & 0x1F) << 11)
 		| ((function & 0x07) << 8)
 		| ((registerOffset) & 0xFC);
 	return id;
