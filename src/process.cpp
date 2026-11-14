@@ -43,12 +43,8 @@ Process& Process::copy(const Process& other) {
 
 	this->esp = this->stack + stack_offset;
 
-	/*for (int i=1; i<stack_offset+1; i++) {
+	for (int i=1; i<stack_offset+1; i++)
 		this->stack[stack_size-i] = other.stack[stack_size-i];
-	}*/ // crash 2x avant de marcher ; à vérifier
-
-	for (uint32_t i=0; i<sizeof(this->stack); i++)
-		this->stack[i] = other.stack[i];
 
 	return *this;
 }
@@ -128,6 +124,8 @@ uint32_t ProcessusManager::AddProcess(func_process p) {
 
 
 	process_node_addr->process.copy(Process(p, last_pid++));
+
+	//process_node_addr->stack[4096] = process_node_addr;
 
 	process_node_addr->process.state = READY;
 
