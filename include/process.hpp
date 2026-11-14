@@ -40,6 +40,9 @@ struct StackFrame {
 enum ProcessState {READY, RUNNING, BLOCKED, TERMINATED};
 
 class Process {
+
+    friend class ProcessusManager;
+
 	public:
 		uint16_t pid;           // Identifiant unique du processus
 	    ProcessState state;     // Etat actuel
@@ -47,10 +50,7 @@ class Process {
 		Process(func_process entry_point, uint16_t pid);
 		~Process();
 
-        Process& Process::copy(const Process& other);
-
-        uint32_t* get_esp_addr();
-        uint32_t get_esp();
+        Process& copy(const Process& other);
 
 	private:
 		uint32_t stack_size;

@@ -6,7 +6,7 @@
 void processB(Process* own_addr);
 void processA(Process* own_addr);
 
-void processStarter(Process own_addr) {
+void processStarter(Process* own_addr) {
 	ProcessusManager& process_manager = ProcessusManager::Instance();
 	process_manager.AddProcess(processA);
 	process_manager.AddProcess(processB);
@@ -63,5 +63,7 @@ void test_process(InterruptManager* itr_manager) {
 	time_manager.set_processManager(&process_manager);
 
 	process_manager.AddProcess(processStarter);
+
+	while(1);
 	return;
 }

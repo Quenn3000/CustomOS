@@ -27,6 +27,10 @@ Process::Process(func_process entry_point, uint16_t pid) :
 	this->esp = stack_top;
 
 	this->state = READY;
+
+	debug_string("\n\nFIRST SET stack_size : ");
+	debug_int(this->stack_size);
+	debug_string("\n\n");
 }
 
 
@@ -37,24 +41,14 @@ Process& Process::copy(const Process& other) {
 	if (this == &other)
 		return *this;
 
-	this->pid = other.pid;
+
 	uint32_t stack_offset = other.esp - (uint32_t)other.stack;
-	this->state = other.state;
 
-	this->esp = this->stack + stack_offset;
+	*this = other;
 
-	for (int i=1; i<stack_offset+1; i++)
-		this->stack[stack_size-i] = other.stack[stack_size-i];
+	this->esp = (uint32_t)this->stack + stack_offset;
 
 	return *this;
-}
-
-uint32_t* Process::get_esp_addr() {
-	return &(this->esp);
-}
-
-uint32_t Process::get_esp() {
-	return this->esp;
 }
 
 
@@ -87,7 +81,7 @@ void ProcessusManager::Schedule() {
 	
 	if (current->process.state == READY) {
 		current->process.state = RUNNING;
-		switch_context(NULL, current->process.get_esp());
+		switch_context(NULL, current->process.esp);
 		return;
 	}
 
@@ -102,8 +96,7 @@ void ProcessusManager::Schedule() {
 	current->process.state = READY;
 	next->process.state = RUNNING;
 	process_table = next;
-
-	switch_context(current->process.get_esp_addr(), next->process.get_esp());
+	switch_context(&(current->process.esp), next->process.esp);
 }
 
 uint32_t ProcessusManager::AddProcess(func_process p) {
@@ -124,8 +117,6 @@ uint32_t ProcessusManager::AddProcess(func_process p) {
 
 
 	process_node_addr->process.copy(Process(p, last_pid++));
-
-	//process_node_addr->stack[4096] = process_node_addr;
 
 	process_node_addr->process.state = READY;
 
