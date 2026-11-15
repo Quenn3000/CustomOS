@@ -54,6 +54,10 @@ Process& Process::copy(const Process& other) {
 	return *this;
 }
 
+uint16_t Process::get_pid() {
+	return this->pid;
+}
+
 
 ProcessusManager* ProcessusManager::_instance_address = NULL;
 

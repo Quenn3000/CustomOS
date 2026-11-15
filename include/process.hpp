@@ -44,13 +44,17 @@ class Process {
     friend class ProcessusManager;
 
 	public:
-		uint16_t pid;           // Identifiant unique du processus
-	    ProcessState state;     // Etat actuel
 
 		Process(func_process entry_point, uint16_t pid);
 		~Process();
 
         Process& copy(const Process& other);
+
+        uint16_t get_pid();
+
+    protected:
+        uint16_t pid;           // Identifiant unique du processus
+        ProcessState state;     // Etat actuel
 
 	private:
 		uint32_t stack_size;
@@ -73,13 +77,12 @@ class ProcessusManager {
     
         uint32_t AddProcess(func_process p); // return pid
         void Schedule();
-
-        MemoryManager& memory_manager;
     
     protected:
         ProcessusManager();
         
     private:
+        MemoryManager& memory_manager;
 
         static ProcessusManager* _instance_address;
     

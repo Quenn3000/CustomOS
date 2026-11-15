@@ -50,7 +50,6 @@ array of 8 blocks indicating if they are free
 */
 class MemoryManager {
 	public:
-		uint16_t memory_map_counter;
 		
 		static MemoryManager& Instance();
 
@@ -66,6 +65,8 @@ class MemoryManager {
 		MemoryManager();
 
 	private:
+		uint16_t memory_map_counter; // nombres de blocks mémoire donnés par les int 15h dans le bootloader
+	
 		static MemoryManager* _instance_address;
 		static MemoryManager _instance;
 	
