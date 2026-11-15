@@ -5,11 +5,16 @@
 
 void processB(Process* own_addr);
 void processA(Process* own_addr);
+void processC(Process* own_addr);
 
 void processStarter(Process* own_addr) {
 	ProcessusManager& process_manager = ProcessusManager::Instance();
+	debug_string("PID Proc Starter : ");
+	debug_int(own_addr->pid);
+	debug_string("\n");
 	process_manager.AddProcess(processA);
 	process_manager.AddProcess(processB);
+	process_manager.AddProcess(processC);
 	while(1);
 }
 
@@ -17,7 +22,9 @@ void processA(Process* own_addr) {
 
 	while(1) {
 
-		debug_string("AAAAA\n");
+		debug_string("PID Proc A : ");
+		debug_int(own_addr->pid);
+		debug_string("\n");
 	}
 	return;
 }
@@ -25,7 +32,19 @@ void processA(Process* own_addr) {
 void processB(Process* own_addr) {
 
 	while(1) {
-		debug_string("BBBBB\n");
+		debug_string("PID Proc B : ");
+		debug_int(own_addr->pid);
+		debug_string("\n");
+	}
+	return;
+}
+
+void processC(Process* own_addr) {
+
+	while(1) {
+		debug_string("PID Proc C : ");
+		debug_int(own_addr->pid);
+		debug_string("\n");
 	}
 	return;
 }

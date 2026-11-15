@@ -7,8 +7,8 @@ Process::Process(func_process entry_point, uint16_t pid) :
 	pid(pid), stack_size(4096) { // static stack size for now
 	
 	// initialize stack (with zeros)
-	uint32_t stack_top = (uint32_t)(this->stack) + 4096; // 4096 -> size of the stack hardly defined in Process
-	stack_top -= sizeof(StackFrame);
+	uint32_t stack_top = (uint32_t)(this->stack) + this->stack_size;
+	stack_top -= sizeof(StackFrame) + sizeof(uint32_t) + sizeof(Process*); // return address slot + arguments of processes
 	StackFrame* stackFrame = (StackFrame*)stack_top;
 
 	stackFrame->edi = 0;
@@ -28,9 +28,8 @@ Process::Process(func_process entry_point, uint16_t pid) :
 
 	this->state = READY;
 
-	debug_string("\n\nFIRST SET stack_size : ");
-	debug_int(this->stack_size);
-	debug_string("\n\n");
+	Process** own_address = stack_top + sizeof(StackFrame) + sizeof(uint32_t);
+	*own_address = this;
 }
 
 
@@ -41,12 +40,16 @@ Process& Process::copy(const Process& other) {
 	if (this == &other)
 		return *this;
 
-
+		
 	uint32_t stack_offset = other.esp - (uint32_t)other.stack;
 
 	*this = other;
 
 	this->esp = (uint32_t)this->stack + stack_offset;
+	
+	// on est obligé de reset own_address pour éviter qu'il point sur l'adresse de l'objet copié
+	Process** own_address = (Process**) (this->stack + this->stack_size - sizeof(Process*));
+	*own_address = this;
 
 	return *this;
 }
@@ -119,6 +122,7 @@ uint32_t ProcessusManager::AddProcess(func_process p) {
 	process_node_addr->process.copy(Process(p, last_pid++));
 
 	process_node_addr->process.state = READY;
+
 
 	return process_node_addr->process.pid;
 
