@@ -1,88 +1,125 @@
 #include <process.hpp>
-#include <utils.hpp>
-#include <memory_management.hpp>
 #include <time.hpp>
 
-void processB(Process* own_addr);
+#include "test_suite.hpp"
+
+// --- demo processes -------------------------------------------------------
+
+static void dummy_entry(Process* own_addr) {
+    (void)own_addr;
+}
+
+static void log_process(const char* name, const char* message, Process* own_addr) {
+    debug_string("[demo] ");
+    debug_string(name);
+    debug_string(": ");
+    debug_string(message);
+    debug_string(" (pid=");
+    debug_int(own_addr->get_pid());
+    debug_string(")\n");
+}
+
 void processA(Process* own_addr);
+void processB(Process* own_addr);
 void processC(Process* own_addr);
+void processD(Process* own_addr);
 
 void processStarter(Process* own_addr) {
-	ProcessusManager& process_manager = ProcessusManager::Instance();
-	debug_string("PID Proc Starter : ");
-	debug_int(own_addr->pid);
-	debug_string("\n");
-	process_manager.AddProcess(processA);
-	process_manager.AddProcess(processB);
-	process_manager.AddProcess(processC);
-	while(1);
+    ProcessusManager& manager = ProcessusManager::Instance();
+
+    log_process("Starter", "started", own_addr);
+    manager.AddProcess(processA);
+    manager.AddProcess(processB);
+    manager.AddProcess(processC);
+
+    for (;;) {
+        for (volatile unsigned int i = 0; i < 1000000; i++) { }
+        log_process("Starter", "alive", own_addr);
+    }
 }
 
 void processA(Process* own_addr) {
+    ProcessusManager& manager = ProcessusManager::Instance();
 
-	while(1) {
+    log_process("A", "started", own_addr);
+    unsigned int iterations = 0;
+    bool added_d = false;
 
-		debug_string("PID Proc A : ");
-		debug_int(own_addr->pid);
-		debug_string("\n");
-	}
-	return;
+    for (;;) {
+        // Regression check: adding a process from a real process stack used
+        // to overflow that stack when AddProcess built a 4 KiB temporary.
+        if (!added_d) {
+            if (++iterations == 100000) {
+                manager.AddProcess(processD);
+                debug_string("[demo] A added process D\n");
+                added_d = true;
+            }
+            continue;
+        }
+        for (volatile unsigned int i = 0; i < 1000000; i++) { }
+        log_process("A", "alive", own_addr);
+    }
 }
 
 void processB(Process* own_addr) {
-
-	while(1) {
-		debug_string("PID Proc B : ");
-		debug_int(own_addr->pid);
-		debug_string("\n");
-	}
-	return;
+    log_process("B", "started", own_addr);
+    for (;;) {
+        for (volatile unsigned int i = 0; i < 1000000; i++) { }
+        log_process("B", "alive", own_addr);
+    }
 }
 
 void processC(Process* own_addr) {
-
-	while(1) {
-		debug_string("PID Proc C : ");
-		debug_int(own_addr->pid);
-		debug_string("\n");
-	}
-	return;
+    log_process("C", "started", own_addr);
+    for (;;) {
+        for (volatile unsigned int i = 0; i < 1000000; i++) { }
+        log_process("C", "alive", own_addr);
+    }
 }
 
+void processD(Process* own_addr) {
+    log_process("D", "started", own_addr);
+    for (;;) {
+        for (volatile unsigned int i = 0; i < 1000000; i++) { }
+        log_process("D", "alive", own_addr);
+    }
+}
+
+// --- unit tests (they all return) ----------------------------------------
+
 void test_process(InterruptManager* itr_manager) {
-	MemoryManager& memory_manager = MemoryManager::Instance();
+    (void)itr_manager;
 
-	void* m1 = memory_manager.malloc();
-	debug_string("\n\nPointeur m1 : 0x");
-	debug_int((int64_t)m1, 16);
-	debug_string("\n");
+    test_begin("process/layout");
+    CHECK_INT(sizeof(StackFrame), 40);
+    CHECK_INT(sizeof(Process), 4112);
+    CHECK_INT(sizeof(ProcessNode), 4120);
+    test_end();
 
-	void* m2 = memory_manager.malloc();
-	debug_string("Pointeur m2 : 0x");
-	debug_int((int64_t)m2, 16);
-	debug_string("\n");
+    test_begin("process/init");
+    Process first;
+    Process second;
 
-	//memory_manager->free(m1);
+    first.init(dummy_entry, 11);
+    second.init(dummy_entry, 22);
 
-	void* m3 = memory_manager.malloc();
-	debug_string("Pointeur m3 : 0x");
-	debug_int((int64_t)m3, 16);
-	debug_string("\n");
+    CHECK_INT(first.get_pid(), 11);
+    CHECK_INT(second.get_pid(), 22);
 
-	memory_manager.free(m2);
+    first.init(dummy_entry, 33);
+    CHECK_INT(first.get_pid(), 33);
+    test_end();
+}
 
-	void* m4 = memory_manager.malloc();
-	debug_string("Pointeur m4 : 0x");
-	debug_int((int64_t)m4, 16);
-	debug_string("\n");
+// --- integration demo (never returns) ------------------------------------
 
-	TimeManager time_manager = TimeManager(itr_manager);
-	ProcessusManager& process_manager = ProcessusManager::Instance();
+void run_process_demo(InterruptManager* itr_manager) {
+    TimeManager time_manager(itr_manager);
+    ProcessusManager& manager = ProcessusManager::Instance();
 
-	time_manager.set_processManager(&process_manager);
+    time_manager.set_processManager(&manager);
+    manager.AddProcess(processStarter);
 
-	process_manager.AddProcess(processStarter);
-
-	while(1);
-	return;
+    debug_string("[demo] timer started, switching to the first process\n");
+    for (;;) { }
 }

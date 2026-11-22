@@ -1,0 +1,244 @@
+@startuml CustomOSClassDiagram
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+
+title CustomOS - Class Diagram
+
+' ============================================================================
+' Interrupts
+' ============================================================================
+
+class InterruptManager {
+  -IDTEntry idt[256]
+  -IDTPointer idt_ptr
+  -int nb_interrupt
+  +InterruptManager()
+  +init()
+  +set_interrupt(int n, uint32_t handler): bool
+  +reset_interrupt(int n): bool
+  -idt_install()
+  -init_pic()
+}
+
+class IDTEntry <<struct>> {
+  +uint16_t offset_low
+  +uint16_t selector
+  +uint8_t zero
+  +uint8_t type_attr
+  +uint16_t offset_high
+}
+
+class IDTPointer <<struct>> {
+  +uint16_t limit
+  +uint32_t base
+}
+
+' ============================================================================
+' Drivers
+' ============================================================================
+
+class KeyboardDriver {
+  {static} +constexpr char scancode_to_ascii[58]
+  {static} +constexpr char shifted_scancode_to_ascii[58]
+  {static} -KeyboardDriver* _instance_address
+  -bool KEY_PRESSED[256]
+  -char KEYBOARD_BUFFER
+  +{static} Instance(InterruptManager* itrManager): KeyboardDriver&
+  +getch(): char
+  +scan_keyboard(char* buff, int buff_size, bool graphic): bool
+  -{static} interrupt_key_handler(entry)
+  #KeyboardDriver(InterruptManager* itrManager)
+}
+
+class TimeManager {
+  +ProcessusManager* process_manager
+  -{static} TimeManager* _instance_address
+  -InterruptManager* itrManager
+  +TimeManager(InterruptManager* itrManager)
+  +set_processManager(ProcessusManager* p): bool
+  -init_timer(uint32_t frequency)
+  -{static} PIT_handler(entry)
+}
+
+' ============================================================================
+' PCI
+' ============================================================================
+
+class PeriphericalComponnentInterconnectController {
+  -Port32Bit dataPort
+  -Port32Bit commandPort
+  +PeriphericalComponnentInterconnectController()
+  +debug_devices()
+  -read(uint8_t bus, uint16_t device, uint8_t function, uint32_t registerOffset): uint32_t
+  -write(uint8_t bus, uint16_t device, uint8_t function, uint32_t registerOffset, uint32_t value)
+  -device_has_function(uint8_t bus, uint16_t device): bool
+  -get_id(uint8_t bus, uint16_t device, uint8_t function, uint32_t registerOffset): uint32_t
+  -get_device_descriptor(uint8_t bus, uint16_t device, uint8_t function): PeriphericalComponnentInterconnectedDeviceDescriptor
+}
+
+class PeriphericalComponnentInterconnectedDeviceDescriptor <<struct>> {
+  +uint32_t portBase
+  +uint32_t interrupt
+  +uint8_t bus
+  +uint16_t device
+  +uint8_t function
+  +uint16_t vendor_id
+  +uint16_t device_id
+  +uint8_t class_id
+  +uint8_t subclass_id
+  +uint8_t interface_id
+  +uint8_t revision
+}
+
+class BaseAdressRegister <<struct>> {
+  +bool prefetchable
+  +uint8_t address
+  +uint32_t size
+  +BaseAdressRegisterType type
+}
+
+enum BaseAdressRegisterType {
+  MemoryMapping = 0
+  InputOutput = 1
+}
+
+' ============================================================================
+' I/O ports
+' ============================================================================
+
+class Port8Bit {
+  +uint16_t port_number
+  +Port8Bit(uint16_t port_number)
+  +write(uint8_t val)
+  +read(): uint8_t
+}
+
+class Port16Bit {
+  +uint16_t port_number
+  +Port16Bit(uint16_t port_number)
+  +write(uint16_t val)
+  +read(): uint16_t
+}
+
+class Port32Bit {
+  +uint16_t port_number
+  +Port32Bit(uint16_t port_number)
+  +write(uint32_t val)
+  +read(): uint32_t
+}
+
+' ============================================================================
+' Memory
+' ============================================================================
+
+enum MemoryType {
+  USABLE = 1
+  RESERVED = 2
+  ACPI = 3
+  ACPI_NVS = 4
+  BAD_MEMORY = 5
+}
+
+class MemoryMapEntry <<struct>> {
+  +uint64_t base_address
+  +uint64_t length
+  +uint32_t type
+  +uint32_t attributes
+}
+
+class MemoryManager {
+  +uint16_t memory_map_counter
+  -{static} MemoryManager* _instance_address
+  -{static} MemoryManager _instance
+  -MemoryMapEntry* memory_map
+  -uint8_t* bitmap
+  -void* memory_block_adress
+  -uint64_t bitmap_size
+  +{static} Instance(): MemoryManager&
+  +get_block(int i): MemoryMapEntry*
+  +get_block_number(): int16_t
+  +malloc(): void*
+  +free(void* addr): bool
+  #MemoryManager()
+}
+
+' ============================================================================
+' Processes
+' ============================================================================
+
+enum ProcessState {
+  READY
+  RUNNING
+  BLOCKED
+  TERMINATED
+}
+
+class StackFrame <<struct>> {
+  +uint32_t edi
+  +uint32_t esi
+  +uint32_t ebp
+  +uint32_t esp_dummy
+  +uint32_t ebx
+  +uint32_t edx
+  +uint32_t ecx
+  +uint32_t eax
+  +uint32_t eflags
+  +uint32_t eip
+}
+
+class Process {
+  +uint16_t pid
+  +ProcessState state
+  +Process(void (*entry_point)(), uint16_t pid)
+  +~Process()
+  +get_esp_addr(): uint32_t*
+  +get_esp(): uint32_t
+  -uint32_t esp
+  -uint8_t stack[4096]
+}
+
+class ProcessNode <<struct>> {
+  +Process process
+  +ProcessNode* next
+  +ProcessNode* prev
+}
+
+class ProcessusManager {
+  +MemoryManager& memory_manager
+  -{static} ProcessusManager* _instance_address
+  -ProcessNode* process_table
+  -uint16_t last_pid
+  +{static} Instance(): ProcessusManager&
+  +AddProcess(void (*p)()): uint32_t
+  +Schedule()
+  #ProcessusManager()
+}
+
+' ============================================================================
+' Relationships
+' ============================================================================
+
+InterruptManager *-- "256" IDTEntry
+InterruptManager *-- "1" IDTPointer
+
+KeyboardDriver ..> InterruptManager : uses
+KeyboardDriver ..> Port8Bit : uses
+
+TimeManager --> InterruptManager : itrManager
+TimeManager --> ProcessusManager : process_manager
+
+PeriphericalComponnentInterconnectController *-- "2" Port32Bit : dataPort / commandPort
+PeriphericalComponnentInterconnectController ..> PeriphericalComponnentInterconnectedDeviceDescriptor : creates
+BaseAdressRegister --> BaseAdressRegisterType : type
+
+MemoryManager o-- "0..*" MemoryMapEntry : memory_map
+
+ProcessusManager --> MemoryManager : memory_manager
+ProcessusManager *-- "0..*" ProcessNode : process_table
+ProcessNode *-- "1" Process : process
+ProcessNode --> ProcessNode : next / prev
+Process --> ProcessState : state
+Process ..> StackFrame : initialises
+
+@enduml

@@ -2,10 +2,17 @@
 #include <process.hpp>
 
 
+Process::~Process() {}
 
-Process::Process(func_process entry_point, uint16_t pid) :
-	pid(pid), stack_size(4096) { // static stack size for now
-	
+
+/*
+Argument : Process other
+Side effect : init all the content of a Process. Change the esp and the argument value
+*/
+void Process::init(func_process entry_point, uint16_t pid) {
+	this->pid = pid;
+	this->stack_size = 4096;
+		
 	// initialize stack (with zeros)
 	uint32_t stack_top = (uint32_t)(this->stack) + this->stack_size;
 	stack_top -= sizeof(StackFrame) + sizeof(uint32_t) + sizeof(Process*); // return address slot + arguments of processes
@@ -30,38 +37,32 @@ Process::Process(func_process entry_point, uint16_t pid) :
 
 	Process** own_address = stack_top + sizeof(StackFrame) + sizeof(uint32_t);
 	*own_address = this;
+
+	return;
 }
 
-
-Process::~Process() {}
-
-
-Process& Process::copy(const Process& other) {
-	if (this == &other)
-		return *this;
-
-		
-	uint32_t stack_offset = other.esp - (uint32_t)other.stack;
-
-	*this = other;
-
-	this->esp = (uint32_t)this->stack + stack_offset;
-	
-	// on est obligé de reset own_address pour éviter qu'il point sur l'adresse de l'objet copié
-	Process** own_address = (Process**) (this->stack + this->stack_size - sizeof(Process*));
-	*own_address = this;
-
-	return *this;
-}
-
+/*
+Return value : return the PID of the current Process
+*/
 uint16_t Process::get_pid() {
 	return this->pid;
+}
+
+/*
+Side effect : terminate the current Process, switch to another one
+Return value : if the Process terminate correctly
+*/
+bool Process::terminate() {
+	this->state = ProcessState::TERMINATED;
+	return true;
 }
 
 
 ProcessusManager* ProcessusManager::_instance_address = NULL;
 
-
+/*
+Get the current ProcessusManager instance, create one if it does not exist
+*/
 ProcessusManager& ProcessusManager::Instance() {
 	if (_instance_address != NULL) {
 		return (ProcessusManager&) *_instance_address;
@@ -79,6 +80,9 @@ ProcessusManager::ProcessusManager() :
 	memory_manager(MemoryManager::Instance()),
 	last_pid(0) {}
 
+/*
+Side effect : switch context to the next ready or running Process
+*/
 void ProcessusManager::Schedule() {
 	if (process_table == NULL)
 		return;
@@ -103,12 +107,24 @@ void ProcessusManager::Schedule() {
 	current->process.state = READY;
 	next->process.state = RUNNING;
 	process_table = next;
+	debug_string("Switch to process at address : ");
+	debug_int(next);
+	debug_string("\n\n");
 	switch_context(&(current->process.esp), next->process.esp);
 }
 
-uint32_t ProcessusManager::AddProcess(func_process p) {
+/*
+Argument : new Process' function
+Side effect : create a new Process with the given function into the Processus Manager
+Return value : PID of the Process created
+*/
+uint32_t ProcessusManager::AddProcess(func_process f_p) {
 
 	ProcessNode* process_node_addr = (ProcessNode*) this->memory_manager.malloc();
+
+	debug_string("process address : ");
+	debug_int(process_node_addr);
+	debug_string("\n\n");
 
 	if (process_table == NULL) {
 		process_node_addr->prev = process_node_addr;
@@ -123,7 +139,9 @@ uint32_t ProcessusManager::AddProcess(func_process p) {
 	}
 
 
-	process_node_addr->process.copy(Process(p, last_pid++));
+	//process_node_addr->process.copy(Process(f_p, last_pid++));
+
+	process_node_addr->process.init(f_p, last_pid++);
 
 	process_node_addr->process.state = READY;
 

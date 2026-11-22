@@ -44,20 +44,20 @@ class Process {
     friend class ProcessusManager;
 
 	public:
-
-		Process(func_process entry_point, uint16_t pid);
 		~Process();
 
-        Process& copy(const Process& other);
+        void init(func_process f, uint16_t pid);
 
         uint16_t get_pid();
+
+        bool terminate();
 
     protected:
         uint16_t pid;           // Identifiant unique du processus
         ProcessState state;     // Etat actuel
 
 	private:
-		uint32_t stack_size;
+		uint32_t stack_size;          // en octet
 		uint32_t esp;                 // ESP sauvegardé
 		uint8_t stack[4096];          // Pile Kernel du processus
 

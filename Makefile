@@ -38,13 +38,8 @@ objects =	kernel_entry.o \
 			stdlib.o \
 			time.o
 
-objects_test =	tests.o \
-				in_format.o \
-				printf.o \
-				process.o \
-				math.o
-
-# := $(shell ls src/tests -1 | sed -e 's/\..*$//')
+# Every .cpp placed in src/tests/ is picked up automatically.
+objects_test = $(patsubst $(SRC_PATH)tests/%.cpp,%.o,$(wildcard $(SRC_PATH)tests/*.cpp))
 
 objects_target = $(addprefix $(RES_PATH),$(objects))
 
@@ -93,6 +88,13 @@ clean:
 tests:
 	@mkdir -p $(TESTS_PATH)
 	$(MAKE) all CFLAGS="$(CFLAGS) -D TEST" objects_target="$(objects_target) $(objects_test_target)"
+
+
+# Build the test image, run it for a few seconds and keep the serial output.
+run_tests: tests
+	@printf "\n$(FONT_CYAN)Running test image (5s)...$(FONT_RESET)\n"
+	timeout 5s qemu-system-x86_64 -drive format=raw,file="res/bin/OS.bin",index=0,if=floppy,readonly=on -m 128M -serial stdio -display none -no-reboot -snapshot 2>&1 | tee $(TESTS_PATH)last_run.log
+
 
 run:
 	qemu-system-x86_64 -drive format=raw,file="res/bin/OS.bin",index=0,if=floppy, -m 128M -serial stdio

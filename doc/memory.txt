@@ -1,0 +1,16 @@
+Gestion de la mémoire par le MemoryManager :
+	- défini le 2nd bloc comme block de mémoire principal
+	- utilise des blocks de la taille des Process, qui eux mêmes ont une pile de 4Ko
+	- aloue au début une bitmap suffisante pour le reste de la mémoire
+	=> bitmap_size =
+		active_zone_size/block_size
+	
+	active_zone_size = zone_size - bitmap_size
+	               = zone_size - active_zone_size/block_size
+	active_zone_size*(1+(1/block_size)) = zone_size
+	-> 1+(1/block_size) != 0 car > 0
+	active_zone_size = zone_size/(1+(1/block_size))
+				   = zone_size/((block_size+1)/block_size)
+				   = zone_size*block_size/(block_size+1)
+	Il faut arrondir le résultat à l'inférieur
+	(sinon y'a risque d'autoriser + de mémoire que disponible)

@@ -1,27 +1,20 @@
-#include <utils.hpp>
 #include <strings.hpp>
 
-#include <utils.hpp>
-#include <strings.hpp>
+#include "test_suite.hpp"
 
 void test_in_format_factor() {
-	int t = 1;
-    int a = 2;
-    char b = 'p';
-    char m = 'a';
-    if (in_format_factor("%d2%c %d %c", "1125 34 m", 4, &t, &m, &a, &b)) {
-        print_string("success format factor\n");
-    } else {
-        print_string("failed format factor\n");
-    }
+    test_begin("strings/in_format_factor");
 
-    print_string("factorised :\n");
-    print_int(t);
-    print_string("\n");
-    print_char(m);
-    print_string("\n");
-    print_int(a);
-    print_string("\n");
-    print_char(b);
-    print_string("\nend factorised\n\n");
+    int number = 0;
+    char letter = 0;
+    char format[] = "%d %c";
+    char text[] = "42 Z";
+
+    bool ok = in_format_factor(format, text, 2, &number, &letter);
+
+    CHECK(ok);
+    CHECK_INT(number, 42);
+    CHECK_INT(letter, 'Z');
+
+    test_end();
 }

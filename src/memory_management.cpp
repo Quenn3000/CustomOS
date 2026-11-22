@@ -68,14 +68,12 @@ void* MemoryManager::malloc() { // return 4Ko free address
 	if (index == bitmap_size)
 		return NULL;
 
-
+	
 	int offset = 0;
-	if (!bitmap[index] == 0) {
-		int mask;
-		for (mask=1; (bitmap[index] & mask) && offset<8; offset+=1) {
-			mask = 1<<offset;
-		}
-		offset-=1;
+	int mask = 1;
+	while ((bitmap[index] & mask) && offset<8) {
+		offset+=1;
+		mask = 1<<offset;
 	}
 
 	bitmap[index] |= 1<<offset; // reserve block in the bitmap
@@ -84,10 +82,20 @@ void* MemoryManager::malloc() { // return 4Ko free address
 }
 
 
+/*
+Argument : void* address
+Side effect : free the corresponding bit in MemoryManager
+Return value : if it worked correctly (if the memory space was already free, return false)
+*/
 bool MemoryManager::free(void* addr) {
+
 	int pos = ((int)addr - (int)(this->memory_block_adress)) / MEMORY_PROCESS_BLOCK_SIZE;
 	int index = ((int)addr - (int)(this->memory_block_adress)) / (MEMORY_PROCESS_BLOCK_SIZE * 8);
 	int offset = (((int)addr - (int)(this->memory_block_adress)) / MEMORY_PROCESS_BLOCK_SIZE) % 8;
+
+	bool freeBefore = (~bitmap[index]) & 1<<offset;
+	//if (freeBefore)
+	//	return false;
 
 	bitmap[index] &= ~(1<<offset);
 
