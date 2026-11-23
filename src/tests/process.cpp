@@ -43,30 +43,29 @@ void processA(Process* own_addr) {
 
     log_process("A", "started", own_addr);
     unsigned int iterations = 0;
-    bool added_d = false;
 
     for (;;) {
         // Regression check: adding a process from a real process stack used
         // to overflow that stack when AddProcess built a 4 KiB temporary.
-        if (!added_d) {
-            if (++iterations == 100000) {
-                manager.AddProcess(processD);
-                debug_string("[demo] A added process D\n");
-                added_d = true;
-            }
-            continue;
-        }
         for (volatile unsigned int i = 0; i < 1000000; i++) { }
         log_process("A", "alive", own_addr);
+
+        if (++iterations == 30) {
+            manager.AddProcess(processD);
+            debug_string("[demo] A added process D\n");
+        }
     }
 }
 
 void processB(Process* own_addr) {
     log_process("B", "started", own_addr);
-    for (;;) {
+    for (int d=0;d<20;d++) {
         for (volatile unsigned int i = 0; i < 1000000; i++) { }
         log_process("B", "alive", own_addr);
     }
+    log_process("B", "terminate", own_addr);
+    own_addr->terminate();
+    while(1);
 }
 
 void processC(Process* own_addr) {

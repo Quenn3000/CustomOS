@@ -54,7 +54,9 @@ Return value : if the Process terminate correctly
 */
 bool Process::terminate() {
 	this->state = ProcessState::TERMINATED;
-	return true;
+	ProcessusManager& process_manager = ProcessusManager::Instance();
+	process_manager.Schedule();
+	return false;
 }
 
 
@@ -98,8 +100,13 @@ void ProcessusManager::Schedule() {
 
 	// Find another READY process (skip the current one).
 	ProcessNode* next = current->next;
-	while (next != current && next->process.state != READY)
+	while (next != current && next->process.state != READY) {
+		if (next->process.state == ProcessState::TERMINATED) {
+			MemoryManager& m = MemoryManager::Instance();
+			m.free(next);
+		}
 		next = next->next;
+	}
 
 	if (next == current) // no other ready process
 		return;
@@ -107,9 +114,6 @@ void ProcessusManager::Schedule() {
 	current->process.state = READY;
 	next->process.state = RUNNING;
 	process_table = next;
-	debug_string("Switch to process at address : ");
-	debug_int(next);
-	debug_string("\n\n");
 	switch_context(&(current->process.esp), next->process.esp);
 }
 
@@ -121,10 +125,6 @@ Return value : PID of the Process created
 uint32_t ProcessusManager::AddProcess(func_process f_p) {
 
 	ProcessNode* process_node_addr = (ProcessNode*) this->memory_manager.malloc();
-
-	debug_string("process address : ");
-	debug_int(process_node_addr);
-	debug_string("\n\n");
 
 	if (process_table == NULL) {
 		process_node_addr->prev = process_node_addr;
